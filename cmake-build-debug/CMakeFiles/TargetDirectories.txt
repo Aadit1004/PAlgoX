@@ -1,0 +1,10 @@
+C:/Users/aadit/Desktop/GitHub projects/PAlgoX/cmake-build-debug/CMakeFiles/tests.dir
+C:/Users/aadit/Desktop/GitHub projects/PAlgoX/cmake-build-debug/CMakeFiles/PAlgoX.dir
+C:/Users/aadit/Desktop/GitHub projects/PAlgoX/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/aadit/Desktop/GitHub projects/PAlgoX/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+C:/Users/aadit/Desktop/GitHub projects/PAlgoX/cmake-build-debug/_deps/catch2-build/CMakeFiles/edit_cache.dir
+C:/Users/aadit/Desktop/GitHub projects/PAlgoX/cmake-build-debug/_deps/catch2-build/CMakeFiles/rebuild_cache.dir
+C:/Users/aadit/Desktop/GitHub projects/PAlgoX/cmake-build-debug/_deps/catch2-build/src/CMakeFiles/Catch2.dir
+C:/Users/aadit/Desktop/GitHub projects/PAlgoX/cmake-build-debug/_deps/catch2-build/src/CMakeFiles/Catch2WithMain.dir
+C:/Users/aadit/Desktop/GitHub projects/PAlgoX/cmake-build-debug/_deps/catch2-build/src/CMakeFiles/edit_cache.dir
+C:/Users/aadit/Desktop/GitHub projects/PAlgoX/cmake-build-debug/_deps/catch2-build/src/CMakeFiles/rebuild_cache.dir
