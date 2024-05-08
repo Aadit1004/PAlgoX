@@ -1,8 +1,18 @@
 #include "palgox.h"
 
-#include <iostream>
+/*
+ *
+ *  palgox_matx implementations
+ *
+ */
 
-void hello()
+palgox::palgox_matx::palgox_matx(const std::vector<std::vector<int>>& input_data)
 {
-    std::cout << "Hello, World!" << std::endl;
+    // constructor
+    // update numCols, numRows, and call isValid first
+}
+
+bool palgox::palgox_matx::isValid()
+{
+    // check if all rows are equal and all cols are equal
 }
