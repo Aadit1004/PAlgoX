@@ -9,10 +9,8 @@
 #include <omp.h>
 #include <thread>
 
-namespace palgox
-{
-    class palgoxException : public std::exception
-    {
+namespace palgox {
+    class palgoxException : public std::exception {
     private:
         std::string message;
     public:
@@ -20,21 +18,23 @@ namespace palgox
         std::string what() { return message;}
     };
 
-    class palgox_matx
-    {
+    class palgox_matx {
     private:
         std::vector<std::vector<int>> m_data;
         int m_numRow;
         int m_numCol;
+
+        bool isSameShape(const palgox_matx* other_matx) const;
+        void applyOperation(const palgox_matx* other_matx, int (*operation)(int, int));
 
     public:
         explicit palgox_matx(const std::vector<std::vector<int>>& input_data);
 
         bool isEqual(const palgox_matx* other_matx) const;
 
-        void addMatx(palgox_matx* other_matx);
+        void addMatx(const palgox_matx* other_matx);
 
-        void subMatx(palgox_matx* other_matx);
+        void subMatx(const palgox_matx* other_matx);
 
         palgox_matx getTranspose();
 
@@ -47,15 +47,13 @@ namespace palgox
         [[nodiscard]] int getValue(int row, int col) const;
     };
 
-    class palgox_vecx
-    {
+    class palgox_vecx {
     private:
 
     public:
     };
 
-    class palgox_graphx
-    {
+    class palgox_graphx {
     private:
 
     public:
