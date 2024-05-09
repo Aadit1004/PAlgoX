@@ -47,14 +47,14 @@ cmake_ninja_workdir = C$:/Users/aadit/Desktop/GitHub$ projects/PAlgoX/cmake-buil
 #############################################
 # Order-only phony target for tests
 
-build cmake_object_order_depends_target_tests: phony || cmake_object_order_depends_target_Catch2 cmake_object_order_depends_target_Catch2WithMain
+build cmake_object_order_depends_target_tests: phony || cmake_object_order_depends_target_Catch2 cmake_object_order_depends_target_Catch2WithMain cmake_object_order_depends_target_PAlgoX
 
-build CMakeFiles/tests.dir/palgox_spec.cpp.obj: CXX_COMPILER__tests_unscanned_Debug C$:/Users/aadit/Desktop/GitHub$ projects/PAlgoX/palgox_spec.cpp || cmake_object_order_depends_target_tests
-  DEP_FILE = CMakeFiles\tests.dir\palgox_spec.cpp.obj.d
+build CMakeFiles/tests.dir/tests/palgox_spec.cpp.obj: CXX_COMPILER__tests_unscanned_Debug C$:/Users/aadit/Desktop/GitHub$ projects/PAlgoX/tests/palgox_spec.cpp || cmake_object_order_depends_target_tests
+  DEP_FILE = CMakeFiles\tests.dir\tests\palgox_spec.cpp.obj.d
   FLAGS = -g -fdiagnostics-color=always
   INCLUDES = -I"C:/Users/aadit/Desktop/GitHub projects/PAlgoX/cmake-build-debug/_deps/catch2-src/src/catch2/.." -I"C:/Users/aadit/Desktop/GitHub projects/PAlgoX/cmake-build-debug/_deps/catch2-build/generated-includes"
   OBJECT_DIR = CMakeFiles\tests.dir
-  OBJECT_FILE_DIR = CMakeFiles\tests.dir
+  OBJECT_FILE_DIR = CMakeFiles\tests.dir\tests
 
 
 # =============================================================================
@@ -64,9 +64,9 @@ build CMakeFiles/tests.dir/palgox_spec.cpp.obj: CXX_COMPILER__tests_unscanned_De
 #############################################
 # Link the executable tests.exe
 
-build tests.exe: CXX_EXECUTABLE_LINKER__tests_Debug CMakeFiles/tests.dir/palgox_spec.cpp.obj | _deps/catch2-build/src/libCatch2Maind.a _deps/catch2-build/src/libCatch2d.a || _deps/catch2-build/src/libCatch2Maind.a _deps/catch2-build/src/libCatch2d.a
+build tests.exe: CXX_EXECUTABLE_LINKER__tests_Debug CMakeFiles/tests.dir/tests/palgox_spec.cpp.obj | _deps/catch2-build/src/libCatch2Maind.a libPAlgoX.a _deps/catch2-build/src/libCatch2d.a || _deps/catch2-build/src/libCatch2Maind.a _deps/catch2-build/src/libCatch2d.a libPAlgoX.a
   FLAGS = -g
-  LINK_LIBRARIES = _deps/catch2-build/src/libCatch2Maind.a  _deps/catch2-build/src/libCatch2d.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  LINK_LIBRARIES = _deps/catch2-build/src/libCatch2Maind.a  libPAlgoX.a  _deps/catch2-build/src/libCatch2d.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\tests.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
@@ -83,11 +83,11 @@ build tests.exe: CXX_EXECUTABLE_LINKER__tests_Debug CMakeFiles/tests.dir/palgox_
 
 build cmake_object_order_depends_target_PAlgoX: phony || CMakeFiles/PAlgoX.dir
 
-build CMakeFiles/PAlgoX.dir/palgox.cpp.obj: CXX_COMPILER__PAlgoX_unscanned_Debug C$:/Users/aadit/Desktop/GitHub$ projects/PAlgoX/palgox.cpp || cmake_object_order_depends_target_PAlgoX
-  DEP_FILE = CMakeFiles\PAlgoX.dir\palgox.cpp.obj.d
+build CMakeFiles/PAlgoX.dir/src/palgox.cpp.obj: CXX_COMPILER__PAlgoX_unscanned_Debug C$:/Users/aadit/Desktop/GitHub$ projects/PAlgoX/src/palgox.cpp || cmake_object_order_depends_target_PAlgoX
+  DEP_FILE = CMakeFiles\PAlgoX.dir\src\palgox.cpp.obj.d
   FLAGS = -g -fdiagnostics-color=always
   OBJECT_DIR = CMakeFiles\PAlgoX.dir
-  OBJECT_FILE_DIR = CMakeFiles\PAlgoX.dir
+  OBJECT_FILE_DIR = CMakeFiles\PAlgoX.dir\src
 
 
 # =============================================================================
@@ -97,7 +97,7 @@ build CMakeFiles/PAlgoX.dir/palgox.cpp.obj: CXX_COMPILER__PAlgoX_unscanned_Debug
 #############################################
 # Link the static library libPAlgoX.a
 
-build libPAlgoX.a: CXX_STATIC_LIBRARY_LINKER__PAlgoX_Debug CMakeFiles/PAlgoX.dir/palgox.cpp.obj
+build libPAlgoX.a: CXX_STATIC_LIBRARY_LINKER__PAlgoX_Debug CMakeFiles/PAlgoX.dir/src/palgox.cpp.obj
   LANGUAGE_COMPILE_FLAGS = -g
   OBJECT_DIR = CMakeFiles\PAlgoX.dir
   POST_BUILD = cd .

@@ -13,8 +13,10 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(Catch2)
 
-add_executable(tests palgox_spec.cpp)
+add_executable(tests tests/palgox_spec.cpp)
 
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
 
-add_library(PAlgoX STATIC palgox.cpp)
+add_library(PAlgoX STATIC src/palgox.cpp)
+
+target_link_libraries(tests PRIVATE PAlgoX)
