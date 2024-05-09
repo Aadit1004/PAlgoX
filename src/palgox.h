@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 #include <omp.h>
+#include <thread>
 
 namespace palgox
 {
@@ -29,19 +30,21 @@ namespace palgox
     public:
         explicit palgox_matx(const std::vector<std::vector<int>>& input_data);
 
-        bool isEqual(palgox_matx& other_matx);
+        bool isEqual(const palgox_matx* other_matx) const;
 
-        void addMatx(palgox_matx& other_matx);
+        void addMatx(palgox_matx* other_matx);
 
-        void subMatx(palgox_matx& other_matx);
+        void subMatx(palgox_matx* other_matx);
 
         palgox_matx getTranspose();
 
-        palgox_matx mulMatx(palgox_matx& other_matx);
+        palgox_matx mulMatx(palgox_matx* other_matx);
 
         [[nodiscard]] int getNumRows() const;
 
         [[nodiscard]] int getNumCols() const;
+
+        [[nodiscard]] int getValue(int row, int col) const;
     };
 
     class palgox_vecx
