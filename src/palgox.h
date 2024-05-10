@@ -35,9 +35,9 @@ namespace palgox {
 
         void subMatx(const palgox_matx* other_matx);
 
-        [[nodiscard]] palgox_matx getTranspose() const;
+        [[nodiscard]] palgox_matx* getTranspose() const;
 
-        palgox_matx mulMatx(const palgox_matx* other_matx) const;
+        palgox_matx* mulMatx(const palgox_matx* other_matx) const;
 
         [[nodiscard]] int getNumRows() const;
 
