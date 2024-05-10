@@ -144,3 +144,17 @@
 886	5002	7370275219983662	tests.exe	5aafa34fd8c9088c
 22	878	7370277074751431	CMakeFiles/tests.dir/tests/palgox_spec.cpp.obj	8c92a47478aca9b2
 878	5028	7370277116131148	tests.exe	5aafa34fd8c9088c
+76	1498	7370539980027214	CMakeFiles/tests.dir/tests/palgox_spec.cpp.obj	8c92a47478aca9b2
+1499	6288	7370540027801822	tests.exe	5aafa34fd8c9088c
+30	860	7370541361975230	CMakeFiles/PAlgoX.dir/src/palgox.cpp.obj	f89b3efaf428bf03
+24	923	7370541362605228	CMakeFiles/tests.dir/tests/palgox_spec.cpp.obj	8c92a47478aca9b2
+861	1077	7370541364153509	libPAlgoX.a	83a67611af79086b
+1077	5173	7370541404992865	tests.exe	5aafa34fd8c9088c
+31	911	7370542271128185	CMakeFiles/PAlgoX.dir/src/palgox.cpp.obj	f89b3efaf428bf03
+29	136	7370543153837035	libPAlgoX.a	83a67611af79086b
+23	898	7370543161455034	CMakeFiles/tests.dir/tests/palgox_spec.cpp.obj	8c92a47478aca9b2
+899	5038	7370543202726710	tests.exe	5aafa34fd8c9088c
+17	1058	7370545695071176	CMakeFiles/tests.dir/tests/palgox_spec.cpp.obj	8c92a47478aca9b2
+1059	5219	7370545736568879	tests.exe	5aafa34fd8c9088c
+22	997	7370546369027472	CMakeFiles/tests.dir/tests/palgox_spec.cpp.obj	8c92a47478aca9b2
+997	5122	7370546410160744	tests.exe	5aafa34fd8c9088c

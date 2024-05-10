@@ -1,3 +1,4 @@
+#include <cmath>
 #include <catch2/catch_test_macros.hpp>
 #include "../src/palgox.h"
 
@@ -85,7 +86,7 @@ TEST_CASE("PAlgoX_MatX Add and Sub Tests", "[single-file]") {
     }
 }
 
-TEST_CASE("PAlgoX_MatX Transpose and Multiplication Tests", "[single-file]") {
+TEST_CASE("PAlgoX_MatX Transpose Tests", "[single-file]") {
     const std::vector<std::vector<int>> test_input_data_one = { // 2 x 2
         {5, 3},
         {-1, 9},
@@ -96,9 +97,8 @@ TEST_CASE("PAlgoX_MatX Transpose and Multiplication Tests", "[single-file]") {
     };
     SECTION("Transpose n x n Size") {
         const std::vector<std::vector<int>> test_output_data = {
-            {5, -1, 2},
-            {3, 9, 7},
-            {8, 4, 3},
+            {5, -1},
+            {3, 9},
         };
         auto* test_matx = new palgox::palgox_matx(test_input_data_one);
         palgox::palgox_matx* transposed_matx;
@@ -109,10 +109,9 @@ TEST_CASE("PAlgoX_MatX Transpose and Multiplication Tests", "[single-file]") {
 
     SECTION("Transpose m x n Size") {
         const std::vector<std::vector<int>> test_output_data = {
-            {5, -1, 2},
-            {3, 9, 7},
-            {8, 4, 3},
-            {2, 1, 2},
+            {5, -1},
+            {3, 9},
+            {8, 4},
         };
         auto* test_matx = new palgox::palgox_matx(test_input_data_two);
         palgox::palgox_matx* transposed_matx;
@@ -120,15 +119,33 @@ TEST_CASE("PAlgoX_MatX Transpose and Multiplication Tests", "[single-file]") {
         auto* expected_matx = new palgox::palgox_matx(test_output_data);
         REQUIRE(transposed_matx->isEqual(expected_matx));
     }
+}
 
+TEST_CASE("PAlgoX_MatX Multiplication Tests", "[single-file]") {
+    const std::vector<std::vector<int>> test_input_data_one = { // 2 x 2
+        {5, 3},
+        {-1, 9},
+    };
+    const std::vector<std::vector<int>> test_input_data_two = { // 2 x 3
+        {5, 3, 8},
+        {-1, 9, 4},
+    };
     SECTION("Multiplication valid dimensions") {
-        // to implement
+        const std::vector<std::vector<int>> test_expected_data = { // 2 x 3
+            {22, 42, 52},
+            {-14, 78, 28},
+        };
+        const auto* test_matx_one = new palgox::palgox_matx(test_input_data_one);
+        const auto* test_matx_two = new palgox::palgox_matx(test_input_data_two);
+        palgox::palgox_matx* output_matx;
+        CHECK_NOTHROW(output_matx = test_matx_one->mulMatx(test_matx_two));
+        const auto* expected_matx = new palgox::palgox_matx(test_expected_data);
+        REQUIRE(output_matx->isEqual(expected_matx));
     }
 
     SECTION("Multiplication invalid dimensions") {
-        // To fix
-        auto* test_matx_one = new palgox::palgox_matx(test_input_data_one);
-        auto* test_matx_two = new palgox::palgox_matx(test_input_data_two);
+        const auto* test_matx_one = new palgox::palgox_matx(test_input_data_one);
+        const auto* test_matx_two = new palgox::palgox_matx(test_input_data_two);
         CHECK_THROWS(test_matx_two->mulMatx(test_matx_one));
     }
 }

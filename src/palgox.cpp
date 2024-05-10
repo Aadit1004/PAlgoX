@@ -38,7 +38,6 @@ bool palgox::palgox_matx::isSameShape(const palgox_matx* other_matx) const {
         other_matx->getNumCols() != this->m_numCol);
 }
 
-
 bool palgox::palgox_matx::isEqual(const palgox_matx* other_matx) const {
     if (!this->isSameShape(other_matx)) return false;
     for (int i = 0; i < this->m_numRow; ++i) {
@@ -104,3 +103,9 @@ palgox::palgox_matx* palgox::palgox_matx::mulMatx(const palgox_matx* other_matx)
     auto* ret_matx = new palgox_matx(retval_data);
     return ret_matx;
 }
+
+/*
+ *
+ *  PAlgoX_VecX implementations
+ *
+ */
