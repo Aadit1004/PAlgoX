@@ -72,3 +72,33 @@ void palgox::palgox_matx::subMatx(const palgox_matx* other_matx) {
     }
     this->applyOperation(other_matx, [](const int a, const int b) {return a - b;});
 }
+
+palgox::palgox_matx palgox::palgox_matx::getTranspose() const {
+    std::vector<std::vector<int>> transposed_data(m_numCol, std::vector<int>(m_numRow));
+#pragma omp parallel for collapse(2)
+    for (int i = 0; i < m_numRow; ++i) {
+        for (int j = 0; j < m_numCol; ++j) {
+            transposed_data[j][i] = m_data[i][j];
+        }
+    }
+    return palgox_matx(transposed_data);
+}
+
+palgox::palgox_matx palgox::palgox_matx::mulMatx(const palgox_matx* other_matx) const {
+    if (this->m_numCol != other_matx->getNumRows()) {
+        throw palgoxException("No matching dimensions for multiplication");
+    }
+    std::vector<std::vector<int>> retval_data(this->m_numRow, std::vector<int>(other_matx->getNumCols()));
+#pragma omp parallel for collapse(2)
+    for (int i = 0; i < this->m_numRow; i++) {
+        for (int j = 0; j < other_matx->getNumCols(); j++) {
+            int sum = 0;
+#pragma omp parallel for reduction(+:sum)
+            for (int k = 0; k < this->getNumCols(); k++) {
+                sum += (this->m_data[i][k] * other_matx->getValue(k, j));
+            }
+            retval_data[i][j] = sum;
+        }
+    }
+    return palgox_matx(retval_data);
+}

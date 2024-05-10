@@ -10,7 +10,7 @@
 #include <thread>
 
 namespace palgox {
-    class palgoxException : public std::exception {
+    class palgoxException final : public std::exception {
     private:
         std::string message;
     public:
@@ -26,7 +26,6 @@ namespace palgox {
 
         bool isSameShape(const palgox_matx* other_matx) const;
         void applyOperation(const palgox_matx* other_matx, int (*operation)(int, int));
-
     public:
         explicit palgox_matx(const std::vector<std::vector<int>>& input_data);
 
@@ -36,9 +35,9 @@ namespace palgox {
 
         void subMatx(const palgox_matx* other_matx);
 
-        palgox_matx getTranspose();
+        [[nodiscard]] palgox_matx getTranspose() const;
 
-        palgox_matx mulMatx(palgox_matx* other_matx);
+        palgox_matx mulMatx(const palgox_matx* other_matx) const;
 
         [[nodiscard]] int getNumRows() const;
 
