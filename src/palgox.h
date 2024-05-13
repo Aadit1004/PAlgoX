@@ -48,8 +48,12 @@ namespace palgox {
 
     class palgox_vecx {
     private:
-
+        std::vector<int> m_data;
+        int m_numElems;
     public:
+        explicit palgox_vecx(const std::vector<int>& input_data);
+        bool isEqual(const palgox_vecx* other_vecx) const;
+        // map, foldlm filter funcs?
     };
 
     class palgox_graphx {
