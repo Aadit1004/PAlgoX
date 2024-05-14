@@ -30,6 +30,9 @@ int palgox::palgox_matx::getNumCols() const {
 }
 
 int palgox::palgox_matx::getValue(const int row, const int col) const {
+    if ((row >= this->getNumRows() || row < 0) || (col >= this->getNumCols() || col < 0)) {
+        throw throw palgoxException("Out of bounds: row or column value");
+    }
     return this->m_data[row][col];
 }
 
