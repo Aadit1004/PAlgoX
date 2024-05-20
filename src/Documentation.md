@@ -14,13 +14,13 @@ Throws Exception: ***Yes***
 Example:
 ```cpp
 int main() {
-	const std::vector<std::vector<int>> test_input_data = {
-            {5, 3, 8, -2, 7},
-            {-1, 9, 4, 6, 0},
-            {2, 7, 3, -8, -5},
-            {8, -2, 5, -3, 7}
-        };
-        auto* test_matx = new palgox::palgox_matx(test_input_data);
+    const std::vector<std::vector<int>> test_input_data = {
+        {5, 3, 8, -2, 7},
+        {-1, 9, 4, 6, 0},
+        {2, 7, 3, -8, -5},
+        {8, -2, 5, -3, 7}
+    };
+    auto* test_matx = new palgox::palgox_matx(test_input_data);
 }
 ```
 
@@ -35,7 +35,7 @@ Throws Exception: ***No***
 Example:
 ```cpp
 int main() {
-	const std::vector<std::vector<int>> test_input_data_one = {
+    const std::vector<std::vector<int>> test_input_data_one = {
         {5, 3, 8},
         {-1, 9, 4},
     };

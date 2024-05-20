@@ -53,6 +53,11 @@ namespace palgox {
     public:
         explicit palgox_vecx(const std::vector<int>& input_data);
         bool isEqual(const palgox_vecx* other_vecx) const;
+
+        [[nodiscard]] int getNumElems() const;
+
+        [[nodiscard]] int getValue(const int idx) const;
+        
         // map, foldlm filter funcs?
     };
 

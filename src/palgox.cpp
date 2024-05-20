@@ -31,7 +31,7 @@ int palgox::palgox_matx::getNumCols() const {
 
 int palgox::palgox_matx::getValue(const int row, const int col) const {
     if ((row >= this->getNumRows() || row < 0) || (col >= this->getNumCols() || col < 0)) {
-        throw throw palgoxException("Out of bounds: row or column value");
+        throw palgoxException("Out of bounds: row or column value");
     }
     return this->m_data[row][col];
 }
@@ -112,3 +112,30 @@ palgox::palgox_matx* palgox::palgox_matx::mulMatx(const palgox_matx* other_matx)
  *  PAlgoX_VecX implementations
  *
  */
+
+palgox::palgox_vecx::palgox_vecx(const std::vector<int>& input_data) {
+    if (input_data.empty()) throw palgoxException("Input data is empty");
+    this->m_numElems = static_cast<int>(input_data.size());
+    this->m_data = input_data;
+}
+
+bool palgox::palgox_vecx::isEqual(const palgox_vecx* other_vecx) const {
+    if (this->m_numElems != other_vecx->getNumElems()) return false;
+#pragma omp parallel for
+    for (int idx = 0; idx < this->m_numElems; idx++) {
+        if (this->m_data[idx] != other_vecx->getValue(idx)) return false;
+    }
+    return true;
+}
+
+int palgox::palgox_vecx::getNumElems() const {
+    return this->m_numElems;
+}
+
+int palgox::palgox_vecx::getValue(const int idx) const {
+    if (idx < 0 || idx > this->m_numElems - 1) {
+        throw palgoxException("Invalid index parameter");
+    }
+    return this->m_data[idx];
+}
+
