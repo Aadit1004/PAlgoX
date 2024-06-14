@@ -57,7 +57,7 @@ namespace palgox {
         [[nodiscard]] int getNumElems() const;
 
         [[nodiscard]] int getValue(const int idx) const;
-        
+
         // map, foldlm filter funcs?
     };
 
