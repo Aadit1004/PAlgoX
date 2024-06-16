@@ -45,10 +45,6 @@ namespace palgox {
 
         [[nodiscard]] int getValue(int row, int col) const;
 
-        // TODO functions:
-        // TODO functions:
-        // TODO functions:
-
         bool andMap(bool (*operation)(int)) const;
 
         bool orMap(bool (*operation)(int)) const;

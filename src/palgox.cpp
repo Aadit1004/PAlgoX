@@ -107,6 +107,32 @@ palgox::palgox_matx* palgox::palgox_matx::mulMatx(const palgox_matx* other_matx)
     return ret_matx;
 }
 
+bool palgox::palgox_matx::andMap(bool (*operation)(int)) const {
+    bool result = true;
+#pragma omp parallel for collapse(2) reduction(&&:result)
+    for (int i = 0; i < this->m_numRow; i++) {
+        for (int j = 0; j < this->m_numCol; j++) {
+            if (!operation(this->m_data[i][j])) {
+                result = false;
+            }
+        }
+    }
+    return result;
+}
+
+bool palgox::palgox_matx::orMap(bool (*operation)(int)) const {
+    bool result = false;
+#pragma omp parallel for collapse(2) reduction(||:result)
+    for (int i = 0; i < this->m_numRow; i++) {
+        for (int j = 0; j < this->m_numCol; j++) {
+            if (operation(this->m_data[i][j])) {
+                result = true;
+            }
+        }
+    }
+    return result;
+}
+
 /*
  *
  *  PAlgoX_VecX implementations
