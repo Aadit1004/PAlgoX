@@ -43,18 +43,24 @@ bool palgox::palgox_matx::isSameShape(const palgox_matx* other_matx) const {
 
 bool palgox::palgox_matx::isEqual(const palgox_matx* other_matx) const {
     if (!this->isSameShape(other_matx)) return false;
+    bool result = true;
+#pragma omp parallel for collapse(2) shared(result)
     for (int i = 0; i < this->m_numRow; ++i) {
-#pragma omp parallel for
         for (int j = 0; j < this->m_numCol; ++j) {
-            if (this->m_data[i][j] != other_matx->getValue(i, j)) return false;
+            if (this->m_data[i][j] != other_matx->getValue(i, j)) {
+#pragma omp atomic write
+                result = false;
+#pragma omp cancel for
+            }
         }
     }
-    return true;
+#pragma omp cancellation point for
+    return result;
 }
 
 void palgox::palgox_matx::applyOperation(const palgox_matx* other_matx, int (*operation)(int, int)) {
+#pragma omp parallel for collapse(2)
     for (int i = 0; i < this->m_numRow; ++i) {
-#pragma omp parallel for
         for (int j = 0; j < this->m_numCol; ++j) {
             this->m_data[i][j] = operation(this->m_data[i][j], other_matx->getValue(i, j));
         }
@@ -113,10 +119,13 @@ bool palgox::palgox_matx::andMap(bool (*operation)(int)) const {
     for (int i = 0; i < this->m_numRow; i++) {
         for (int j = 0; j < this->m_numCol; j++) {
             if (!operation(this->m_data[i][j])) {
+#pragma omp atomic write
                 result = false;
+#pragma omp cancel for
             }
         }
     }
+#pragma omp cancellation point for
     return result;
 }
 
@@ -126,10 +135,13 @@ bool palgox::palgox_matx::orMap(bool (*operation)(int)) const {
     for (int i = 0; i < this->m_numRow; i++) {
         for (int j = 0; j < this->m_numCol; j++) {
             if (operation(this->m_data[i][j])) {
+#pragma omp atomic write
                 result = true;
+#pragma omp cancel for
             }
         }
     }
+#pragma omp cancellation point for
     return result;
 }
 
@@ -147,11 +159,17 @@ palgox::palgox_vecx::palgox_vecx(const std::vector<int>& input_data) {
 
 bool palgox::palgox_vecx::isEqual(const palgox_vecx* other_vecx) const {
     if (this->m_numElems != other_vecx->getNumElems()) return false;
-#pragma omp parallel for
+    bool result = true;
+#pragma omp parallel for shared(result)
     for (int idx = 0; idx < this->m_numElems; idx++) {
-        if (this->m_data[idx] != other_vecx->getValue(idx)) return false;
+        if (this->m_data[idx] != other_vecx->getValue(idx)) {
+#pragma omp atomic write // prevents race conditions in writing
+            result = false;
+#pragma omp cancel for
+        }
     }
-    return true;
+#pragma omp cancellation point for
+    return result;
 }
 
 int palgox::palgox_vecx::getNumElems() const {
@@ -164,4 +182,3 @@ int palgox::palgox_vecx::getValue(const int idx) const {
     }
     return this->m_data[idx];
 }
-
