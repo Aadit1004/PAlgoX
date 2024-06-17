@@ -166,3 +166,47 @@ int main() {
     // -14 78 28
 }
 ```
+
+### palgox::palgox_matx andMap()
+
+Parameters:
+- operation: a boolean function that takes in an integer
+
+Throws Exception: ***No***
+
+Return Value: True if the *AND* operation on all elements is true
+
+Example:
+```cpp
+int main() {
+    const std::vector<std::vector<int>> test_input_data = {
+        {5, 3},
+        {-1, 9},
+    };
+    const auto* test_matx = new palgox::palgox_matx(test_input_data);
+    bool result = test_matx->andMap([](const int a) {return a > -5;});
+    std::cout << result << std::endl; // prints true
+}
+```
+
+### palgox::palgox_matx orMap()
+
+Parameters:
+- operation: a boolean function that takes in an integer
+
+Throws Exception: ***No***
+
+Return Value: True if the *OR* operation on all elements is true
+
+Example:
+```cpp
+int main() {
+    const std::vector<std::vector<int>> test_input_data = {
+        {5, 3},
+        {-1, 9},
+    };
+    const auto* test_matx = new palgox::palgox_matx(test_input_data);
+    bool result = test_matx->orMap([](const int a) {return a > 3;});
+    std::cout << result << std::endl; // prints true
+}
+```
