@@ -1,10 +1,7 @@
-## **Documentation**
-Documentation for all methods for the library. Currently supporting Integer data type.
+## **PAlgoX_MatX Documentation**
+Documentation for the PAlgoX MatX class methods. Currently supporting Integer data type.
 
-## PAlgoX_MatX Class
-Matrix Class for PAlgoX
-
-### palgox::palgox_matx Constructor 
+### palgox::palgox_matx Constructor
 
 Parameters:
 - input_data: 2-dimensional, non-empty vector of integers.
@@ -139,7 +136,7 @@ int main() {
 
 ### palgox::palgox_matx mulMatx()
 
-Parameters: 
+Parameters:
 - other_matx: a palgox_matx to multiply to *this* palgox_matx
 
 Throws Exception: ***Yes***

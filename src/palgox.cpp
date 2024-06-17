@@ -151,14 +151,33 @@ bool palgox::palgox_matx::orMap(bool (*operation)(int)) const {
  *
  */
 
+// Constructor 1
 palgox::palgox_vecx::palgox_vecx(const std::vector<int>& input_data) {
     if (input_data.empty()) throw palgoxException("Input data is empty");
     this->m_numElems = static_cast<int>(input_data.size());
     this->m_data = input_data;
 }
 
+// Constructor 2
+palgox::palgox_vecx::palgox_vecx(const int size, int (*operation)(int)) {
+    if (size <= 0) throw palgoxException("Input size but be positive");
+    int arr[size];
+#pragma omp parallel for
+    for (int i = 0; i < size; i++) {
+        arr[i] = operation(i);
+    }
+    this->m_numElems = size;
+    const std::vector<int> temp(arr, arr + size);
+    this->m_data = temp;
+}
+
+bool palgox::palgox_vecx::isSameSize(const palgox_vecx* other_vecx) const {
+    return this->m_numElems != other_vecx->getNumElems();
+}
+
+
 bool palgox::palgox_vecx::isEqual(const palgox_vecx* other_vecx) const {
-    if (this->m_numElems != other_vecx->getNumElems()) return false;
+    if (!this->isSameSize(other_vecx)) return false;
     bool result = true;
 #pragma omp parallel for shared(result)
     for (int idx = 0; idx < this->m_numElems; idx++) {
@@ -181,4 +200,44 @@ int palgox::palgox_vecx::getValue(const int idx) const {
         throw palgoxException("Invalid index parameter");
     }
     return this->m_data[idx];
+}
+void palgox::palgox_vecx::applyOperation(int (*operation)(int)) {
+#pragma omp parallel for
+    for (int i = 0; i < this->m_numElems; i++) {
+        this->m_data[i] = operation(this->m_data[i]);
+    }
+}
+
+void palgox::palgox_vecx::addVecx(const palgox_vecx* other_vecx) {
+    if (!this->isSameSize(other_vecx)) {
+        throw palgoxException("Different number of elements");
+    }
+#pragma omp parallel for
+    for (int i = 0; i < this->m_numElems; i++) {
+        this->m_data[i] += other_vecx->getValue(i);
+    }
+}
+
+void palgox::palgox_vecx::subVecx(const palgox_vecx* other_vecx) {
+    if (!this->isSameSize(other_vecx)) {
+        throw palgoxException("Different number of elements");
+    }
+#pragma omp parallel for
+    for (int i = 0; i < this->m_numElems; i++) {
+        this->m_data[i] -= other_vecx->getValue(i);
+    }
+}
+
+int palgox::palgox_vecx::search(const int value) const {
+    int idx = -1;
+#pragma omp parallel for
+    for (int i = 0; i < this->m_numElems; i++) {
+        if (this->m_data[i] == value) {
+#pragma omp atomic write
+            idx = i;
+#pragma omp cancel for
+        }
+    }
+#pragma omp cancellation point for
+    return idx;
 }

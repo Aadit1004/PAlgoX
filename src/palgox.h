@@ -68,17 +68,17 @@ namespace palgox {
 
         [[nodiscard]] int getValue(int idx) const;
 
-        void applyOperation(int (*operation)(int, int));
+        void applyOperation(int (*operation)(int));
 
         void addVecx(const palgox_vecx* other_vecx);
 
         void subVecx(const palgox_vecx* other_vecx);
 
+        [[nodiscard]] int search(int value) const;
+
         void quickSort();
 
         void mergeSort();
-
-        int search(int value);
 
         palgox_vecx* filter(bool (*operation)(int)) const;
 

@@ -2,7 +2,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include "../src/palgox.h"
 
-
+/*
+ * PAlgoX_MatX unit tests
+ */
 TEST_CASE( "PAlgoX_MatX Constructor Tests", "[single-file]" ) {
 
     SECTION("Valid PAlgoX_MatX Constructor Test") {
@@ -206,3 +208,7 @@ TEST_CASE("PAlgoX_MatX andMap and orMap Tests", "[single-file]") {
         delete(test_matx);
     }
 }
+
+/*
+ * PAlgoX_VecX unit tests
+ */
