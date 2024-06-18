@@ -59,9 +59,13 @@ namespace palgox {
 
         bool isSameSize(const palgox_vecx* other_vecx) const;
 
-        static void quickSortHelper(std::vector<int>& arr, int low, int high);
+        void quickSortHelper(std::vector<int>& arr, int low, int high);
 
         static int partition(std::vector<int>& arr,int low,int high);
+
+        void mergeSortHelper(std::vector<int>& arr, int begin, int end);
+
+        static void merge(std::vector<int>& arr, int left, int mid, int right);
     public:
         explicit palgox_vecx(const std::vector<int>& input_data);
 

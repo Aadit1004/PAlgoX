@@ -18,7 +18,7 @@ TEST_CASE( "PAlgoX_MatX Constructor Tests", "[single-file]" ) {
         CHECK_NOTHROW(test_matx = new palgox::palgox_matx(test_input_data));
         REQUIRE(test_matx->getNumRows() == 4);
         REQUIRE(test_matx->getNumCols() == 5);
-        delete(test_matx);
+        delete test_matx;
     }
 
     SECTION("Invalid PAlgoX_MatX Constructor Test - Inconsistent Columns") {
@@ -30,14 +30,14 @@ TEST_CASE( "PAlgoX_MatX Constructor Tests", "[single-file]" ) {
         };
         palgox::palgox_matx* test_matx;
         CHECK_THROWS(test_matx = new palgox::palgox_matx(test_input_data));
-        delete(test_matx);
+        delete test_matx;
     }
 
     SECTION("Invalid PAlgoX_MatX Constructor Test - Empty Input Data") {
         const std::vector<std::vector<int>> test_input_data = {};
         palgox::palgox_matx* test_matx;
         CHECK_THROWS(test_matx = new palgox::palgox_matx(test_input_data));
-        delete(test_matx);
+        delete test_matx;
     }
 }
 
@@ -64,17 +64,17 @@ TEST_CASE("PAlgoX_MatX Add and Sub Tests", "[single-file]") {
         auto* test_matx_output = new palgox::palgox_matx(test_output_data_add);
         CHECK_NOTHROW(test_matx_one->addMatx(test_matx_two));
         REQUIRE(test_matx_one->isEqual(test_matx_output));
-        delete(test_matx_one);
-        delete(test_matx_two);
-        delete(test_matx_output);
+        delete test_matx_one;
+        delete test_matx_two;
+        delete test_matx_output;
     }
 
     SECTION("Invalid PAlgoX_MatX Add Test - Different sizes") {
         auto* test_matx_one = new palgox::palgox_matx(test_input_data_one);
         auto* test_matx_two = new palgox::palgox_matx(test_output_data_diffSize);
         CHECK_THROWS(test_matx_one->addMatx(test_matx_two));
-        delete(test_matx_one);
-        delete(test_matx_two);
+        delete test_matx_one;
+        delete test_matx_two;
     }
 
     SECTION("Valid PAlgoX_MatX Sub Test") {
@@ -87,17 +87,17 @@ TEST_CASE("PAlgoX_MatX Add and Sub Tests", "[single-file]") {
         auto* test_matx_output = new palgox::palgox_matx(test_output_data_sub);
         CHECK_NOTHROW(test_matx_one->subMatx(test_matx_two));
         REQUIRE(test_matx_one->isEqual(test_matx_output));
-        delete(test_matx_one);
-        delete(test_matx_two);
-        delete(test_matx_output);
+        delete test_matx_one;
+        delete test_matx_two;
+        delete test_matx_output;
     }
 
     SECTION("Invalid PAlgoX_MatX Sub Test - Different sizes") {
         auto* test_matx_one = new palgox::palgox_matx(test_input_data_one);
         auto* test_matx_two = new palgox::palgox_matx(test_output_data_diffSize);
         CHECK_THROWS(test_matx_one->subMatx(test_matx_two));
-        delete(test_matx_one);
-        delete(test_matx_two);
+        delete test_matx_one;
+        delete test_matx_two;
     }
 }
 
@@ -120,9 +120,9 @@ TEST_CASE("PAlgoX_MatX Transpose Tests", "[single-file]") {
         CHECK_NOTHROW(transposed_matx = test_matx->getTranspose());
         auto* expected_matx = new palgox::palgox_matx(test_output_data);
         REQUIRE(transposed_matx->isEqual(expected_matx));
-        delete(test_matx);
-        delete(transposed_matx);
-        delete(expected_matx);
+        delete test_matx;
+        delete transposed_matx;
+        delete expected_matx;
 
     }
 
@@ -137,9 +137,9 @@ TEST_CASE("PAlgoX_MatX Transpose Tests", "[single-file]") {
         CHECK_NOTHROW(transposed_matx = test_matx->getTranspose());
         auto* expected_matx = new palgox::palgox_matx(test_output_data);
         REQUIRE(transposed_matx->isEqual(expected_matx));
-        delete(test_matx);
-        delete(transposed_matx);
-        delete(expected_matx);
+        delete test_matx;
+        delete transposed_matx;
+        delete expected_matx;
     }
 }
 
@@ -159,22 +159,22 @@ TEST_CASE("PAlgoX_MatX Multiplication Tests", "[single-file]") {
         };
         const auto* test_matx_one = new palgox::palgox_matx(test_input_data_one);
         const auto* test_matx_two = new palgox::palgox_matx(test_input_data_two);
-        palgox::palgox_matx* output_matx;
+        const palgox::palgox_matx* output_matx = nullptr;
         CHECK_NOTHROW(output_matx = test_matx_one->mulMatx(test_matx_two));
         const auto* expected_matx = new palgox::palgox_matx(test_expected_data);
         REQUIRE(output_matx->isEqual(expected_matx));
-        delete(test_matx_one);
-        delete(test_matx_two);
-        delete(output_matx);
-        delete(expected_matx);
+        delete test_matx_one;
+        delete test_matx_two;
+        delete output_matx;
+        delete expected_matx;
     }
 
     SECTION("Multiplication invalid dimensions") {
         const auto* test_matx_one = new palgox::palgox_matx(test_input_data_one);
         const auto* test_matx_two = new palgox::palgox_matx(test_input_data_two);
         CHECK_THROWS(test_matx_two->mulMatx(test_matx_one));
-        delete(test_matx_one);
-        delete(test_matx_two);
+        delete test_matx_one;
+        delete test_matx_two;
     }
 }
 
@@ -187,25 +187,25 @@ TEST_CASE("PAlgoX_MatX andMap and orMap Tests", "[single-file]") {
     SECTION("andMap True Case") {
         const auto* test_matx = new palgox::palgox_matx(test_input_data);
         REQUIRE(test_matx->andMap([](const int a) {return a > -5;}));
-        delete(test_matx);
+        delete test_matx;
     }
 
     SECTION("andMap False Case") {
         const auto* test_matx = new palgox::palgox_matx(test_input_data);
         REQUIRE_FALSE(test_matx->andMap([](const int a) {return a > 0;}));
-        delete(test_matx);
+        delete test_matx;
     }
 
     SECTION("orMap True Case") {
         const auto* test_matx = new palgox::palgox_matx(test_input_data);
         REQUIRE(test_matx->orMap([](const int a) {return a > 3;}));
-        delete(test_matx);
+        delete test_matx;
     }
 
     SECTION("orMap False Case") {
         const auto* test_matx = new palgox::palgox_matx(test_input_data);
         REQUIRE_FALSE(test_matx->orMap([](const int a) {return a < -10;}));
-        delete(test_matx);
+        delete test_matx;
     }
 }
 
@@ -302,6 +302,45 @@ TEST_CASE("PAlgoX_VecX applyOperation/ addVecx/ subVecx Tests", "[single-file]")
         CHECK_THROWS(test_vecx_one->subVecx(test_vecx_invalid));
         delete test_vecx_one;
         delete test_vecx_invalid;
+    }
+
+}
+
+TEST_CASE("PAlgoX_VecX search/ quickSort/ mergeSort Tests", "[single-file]") {
+    const std::vector<int> test_input_data = {-6, 44, 728, -3, -17, 131};
+
+    SECTION("Valid PAlgoX_VecX search Test - value exists") {
+        const auto* test_vecx = new palgox::palgox_vecx(test_input_data);
+        int result;
+        CHECK_NOTHROW(result = test_vecx->search(-3));
+        REQUIRE(result == 3);
+        delete test_vecx;
+    }
+
+    SECTION("Valid PAlgoX_VecX search Test - value doesn't exist") {
+        const auto* test_vecx = new palgox::palgox_vecx(test_input_data);
+        int result;
+        CHECK_NOTHROW(result = test_vecx->search(10));
+        REQUIRE(result == -1);
+        delete test_vecx;
+    }
+
+    SECTION("Valid PAlgoX_VecX quickSort Test") {
+        auto* test_vecx = new palgox::palgox_vecx(test_input_data);
+        auto* expected_vecx = new palgox::palgox_vecx({-17, -6, -3, 44, 131, 728});
+        CHECK_NOTHROW(test_vecx->quickSort());
+        REQUIRE(test_vecx->isEqual(expected_vecx));
+        delete test_vecx;
+        delete expected_vecx;
+    }
+
+    SECTION("Valid PAlgoX_VecX mergeSort Test") {
+        auto* test_vecx = new palgox::palgox_vecx(test_input_data);
+        auto* expected_vecx = new palgox::palgox_vecx({-17, -6, -3, 44, 131, 728});
+        CHECK_NOTHROW(test_vecx->mergeSort());
+        REQUIRE(test_vecx->isEqual(expected_vecx));
+        delete test_vecx;
+        delete expected_vecx;
     }
 
 }

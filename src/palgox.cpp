@@ -247,17 +247,10 @@ void palgox::palgox_vecx::quickSort() {
 void palgox::palgox_vecx::quickSortHelper(std::vector<int>& arr, const int low, const int high) {
     if(low<high) {
         const int mid = partition(arr,low,high);
-#pragma omp parallel sections
-        {
-#pragma omp section
-            {
-                quickSortHelper(arr, low, mid - 1);
-            }
-#pragma omp section
-            {
-                quickSortHelper(arr, mid + 1, high);
-            }
-        }
+        std::thread leftThread(&palgox_vecx::quickSortHelper, this, std::ref(arr), low, mid - 1);
+        std::thread rightThread(&palgox_vecx::quickSortHelper, this, std::ref(arr), mid + 1, high);
+        leftThread.join();
+        rightThread.join();
     }
 }
 
@@ -272,4 +265,69 @@ int palgox::palgox_vecx::partition(std::vector<int>& arr, const int low, const i
     }
     std::swap(arr[i+1], arr[high]);
     return (i+1);
+}
+
+void palgox::palgox_vecx::mergeSort() {
+    mergeSortHelper(this->m_data, 0, this->m_numElems - 1);
+}
+
+void palgox::palgox_vecx::mergeSortHelper(std::vector<int>& arr, const int begin, const int end) {
+    if (begin >= end) {
+        return;
+    }
+    const int mid = begin + (end - begin) / 2;
+
+    if (end - begin > 500) { // to not cause overhead with multiple threads
+        std::thread leftThread(&palgox_vecx::mergeSortHelper, this, std::ref(arr), begin, mid);
+        std::thread rightThread(&palgox_vecx::mergeSortHelper, this, std::ref(arr), mid + 1, end);
+        leftThread.join();
+        rightThread.join();
+    } else {
+        mergeSortHelper(arr, begin, mid);
+        mergeSortHelper(arr, mid + 1, end);
+    }
+    merge(arr, begin, mid, end);
+}
+
+void palgox::palgox_vecx::merge(std::vector<int>& arr, int left, int mid, int right) {
+    int const subArrayOne = mid - left + 1;
+    int const subArrayTwo = right - mid;
+
+    auto *leftArray = new int[subArrayOne];
+    auto *rightArray = new int[subArrayTwo];
+
+    for (auto i = 0; i < subArrayOne; i++) {
+        leftArray[i] = arr[left + i];
+    }
+    for (auto j = 0; j < subArrayTwo; j++) {
+        rightArray[j] = arr[mid + 1 + j];
+    }
+
+    auto indexOfSubArrayOne = 0, indexOfSubArrayTwo = 0;
+    int indexOfMergedArray = left;
+
+    while (indexOfSubArrayOne < subArrayOne && indexOfSubArrayTwo < subArrayTwo) {
+        if (leftArray[indexOfSubArrayOne] <= rightArray[indexOfSubArrayTwo]) {
+            arr[indexOfMergedArray] = leftArray[indexOfSubArrayOne];
+            indexOfSubArrayOne++;
+        } else {
+            arr[indexOfMergedArray] = rightArray[indexOfSubArrayTwo];
+            indexOfSubArrayTwo++;
+        }
+        indexOfMergedArray++;
+    }
+
+    while (indexOfSubArrayOne < subArrayOne) {
+        arr[indexOfMergedArray] = leftArray[indexOfSubArrayOne];
+        indexOfSubArrayOne++;
+        indexOfMergedArray++;
+    }
+
+    while (indexOfSubArrayTwo < subArrayTwo) {
+        arr[indexOfMergedArray] = rightArray[indexOfSubArrayTwo];
+        indexOfSubArrayTwo++;
+        indexOfMergedArray++;
+    }
+    delete[] leftArray;
+    delete[] rightArray;
 }
