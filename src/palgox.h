@@ -8,6 +8,7 @@
 #include <iostream>
 #include <omp.h>
 #include <thread>
+#include <algorithm>
 
 namespace palgox {
     class palgoxException final : public std::exception {
@@ -57,6 +58,10 @@ namespace palgox {
         int m_numElems;
 
         bool isSameSize(const palgox_vecx* other_vecx) const;
+
+        static void quickSortHelper(std::vector<int>& arr, int low, int high);
+
+        static int partition(std::vector<int>& arr,int low,int high);
     public:
         explicit palgox_vecx(const std::vector<int>& input_data);
 

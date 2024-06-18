@@ -161,20 +161,17 @@ palgox::palgox_vecx::palgox_vecx(const std::vector<int>& input_data) {
 // Constructor 2
 palgox::palgox_vecx::palgox_vecx(const int size, int (*operation)(int)) {
     if (size <= 0) throw palgoxException("Input size but be positive");
-    int arr[size];
+    this->m_data.resize(size);
 #pragma omp parallel for
     for (int i = 0; i < size; i++) {
-        arr[i] = operation(i);
+        this->m_data[i] = operation(i);
     }
     this->m_numElems = size;
-    const std::vector<int> temp(arr, arr + size);
-    this->m_data = temp;
 }
 
 bool palgox::palgox_vecx::isSameSize(const palgox_vecx* other_vecx) const {
-    return this->m_numElems != other_vecx->getNumElems();
+    return this->m_numElems == other_vecx->getNumElems();
 }
-
 
 bool palgox::palgox_vecx::isEqual(const palgox_vecx* other_vecx) const {
     if (!this->isSameSize(other_vecx)) return false;
@@ -182,7 +179,7 @@ bool palgox::palgox_vecx::isEqual(const palgox_vecx* other_vecx) const {
 #pragma omp parallel for shared(result)
     for (int idx = 0; idx < this->m_numElems; idx++) {
         if (this->m_data[idx] != other_vecx->getValue(idx)) {
-#pragma omp atomic write // prevents race conditions in writing
+#pragma omp critical
             result = false;
 #pragma omp cancel for
         }
@@ -201,6 +198,7 @@ int palgox::palgox_vecx::getValue(const int idx) const {
     }
     return this->m_data[idx];
 }
+
 void palgox::palgox_vecx::applyOperation(int (*operation)(int)) {
 #pragma omp parallel for
     for (int i = 0; i < this->m_numElems; i++) {
@@ -240,4 +238,38 @@ int palgox::palgox_vecx::search(const int value) const {
     }
 #pragma omp cancellation point for
     return idx;
+}
+
+void palgox::palgox_vecx::quickSort() {
+    quickSortHelper(this->m_data, 0, this->m_numElems - 1);
+}
+
+void palgox::palgox_vecx::quickSortHelper(std::vector<int>& arr, const int low, const int high) {
+    if(low<high) {
+        const int mid = partition(arr,low,high);
+#pragma omp parallel sections
+        {
+#pragma omp section
+            {
+                quickSortHelper(arr, low, mid - 1);
+            }
+#pragma omp section
+            {
+                quickSortHelper(arr, mid + 1, high);
+            }
+        }
+    }
+}
+
+int palgox::palgox_vecx::partition(std::vector<int>& arr, const int low, const int high) {
+    const int pivot = arr[high];
+    int i = low-1;
+    for (int j = low; j <= high - 1; j++) {
+        if(arr[j] < pivot) {
+            i++;
+            std::swap(arr[i],arr[j]);
+        }
+    }
+    std::swap(arr[i+1], arr[high]);
+    return (i+1);
 }

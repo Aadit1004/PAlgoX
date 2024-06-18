@@ -212,3 +212,96 @@ TEST_CASE("PAlgoX_MatX andMap and orMap Tests", "[single-file]") {
 /*
  * PAlgoX_VecX unit tests
  */
+TEST_CASE( "PAlgoX_VecX Constructor Tests", "[single-file]" ) {
+
+    SECTION("Valid PAlgoX_VecX Constructor 1 Test") {
+        const std::vector<int> test_input_data = {5, 3, 8, -2, 7};
+        const palgox::palgox_vecx* test_vecx = nullptr;
+        CHECK_NOTHROW(test_vecx = new palgox::palgox_vecx(test_input_data));
+        REQUIRE(test_vecx->getNumElems() == 5);
+        delete test_vecx;
+    }
+
+    SECTION("Invalid PAlgoX_VecX Constructor 1 Test - Empty Input Data") {
+        const std::vector<int> test_input_data = {};
+        const palgox::palgox_vecx* test_vecx = nullptr;
+        CHECK_THROWS(test_vecx = new palgox::palgox_vecx(test_input_data));
+        delete test_vecx;
+    }
+
+    SECTION("Valid PAlgoX_VecX Constructor 2 Test") {
+        int size = 5;
+        const palgox::palgox_vecx* test_vecx = nullptr;
+        const std::vector<int> expected_data = {1, 3, 5, 7, 9};
+        auto* expected_vecx = new palgox::palgox_vecx(expected_data);
+        CHECK_NOTHROW(test_vecx = new palgox::palgox_vecx(size, [](const int num){return (2 * num) + 1;}));
+        REQUIRE(test_vecx->getNumElems() == 5);
+        REQUIRE(test_vecx->isEqual(expected_vecx));
+        delete test_vecx;
+        delete expected_vecx;
+    }
+
+    SECTION("Invalid PAlgoX_VecX Constructor 2 Test - Invalid Size Parameter") {
+        constexpr int size = -3;
+        const palgox::palgox_vecx* test_vecx = nullptr;
+        CHECK_THROWS(test_vecx = new palgox::palgox_vecx(size, [](const int num){return (2 * num) + 1;}));
+        delete test_vecx;
+    }
+}
+
+TEST_CASE("PAlgoX_VecX applyOperation/ addVecx/ subVecx Tests", "[single-file]") {
+    const std::vector<int> test_input_data_one = {1, -2, 3, -4, 5, -6};
+    const std::vector<int> test_input_data_two = {-7, 8, -9, 10, -11, 12};
+    const std::vector<int> test_invalid_data = {1, 2, 3};
+
+    SECTION("Valid PAlgoX_VecX applyOperation Test") {
+        auto* test_vecx = new palgox::palgox_vecx(test_input_data_one);
+        const std::vector<int> expected_data = {1, 2, 3, 4, 5, 6};
+        const auto* expected_vecx = new palgox::palgox_vecx(expected_data);
+        CHECK_NOTHROW(test_vecx->applyOperation([](const int num){return std::abs(num);}));
+        REQUIRE(test_vecx->isEqual(expected_vecx));
+        delete test_vecx;
+        delete expected_vecx;
+    }
+
+    SECTION("Valid PAlgoX_VecX addVecx Test") {
+        auto* test_vecx_one = new palgox::palgox_vecx(test_input_data_one);
+        auto* test_vecx_two = new palgox::palgox_vecx(test_input_data_two);
+        const std::vector<int> expected_data = {-6, 6, -6, 6, -6, 6};
+        const auto* expected_vecx = new palgox::palgox_vecx(expected_data);
+        CHECK_NOTHROW(test_vecx_one->addVecx(test_vecx_two));
+        REQUIRE(test_vecx_one->isEqual(expected_vecx));
+        delete test_vecx_one;
+        delete test_vecx_two;
+        delete expected_vecx;
+    }
+
+    SECTION("Invalid PAlgoX_VecX addVecx Test") {
+        auto* test_vecx_one = new palgox::palgox_vecx(test_input_data_one);
+        auto* test_vecx_invalid = new palgox::palgox_vecx(test_invalid_data);
+        CHECK_THROWS(test_vecx_one->addVecx(test_vecx_invalid));
+        delete test_vecx_one;
+        delete test_vecx_invalid;
+    }
+
+    SECTION("Valid PAlgoX_VecX subVecx Test") {
+        auto* test_vecx_one = new palgox::palgox_vecx(test_input_data_one);
+        auto* test_vecx_two = new palgox::palgox_vecx(test_input_data_two);
+        const std::vector<int> expected_data = {8, -10, 12, -14, 16, -18};
+        const auto* expected_vecx = new palgox::palgox_vecx(expected_data);
+        CHECK_NOTHROW(test_vecx_one->subVecx(test_vecx_two));
+        REQUIRE(test_vecx_one->isEqual(expected_vecx));
+        delete test_vecx_one;
+        delete test_vecx_two;
+        delete expected_vecx;
+    }
+
+    SECTION("Invalid PAlgoX_VecX subVecx Test") {
+        auto* test_vecx_one = new palgox::palgox_vecx(test_input_data_one);
+        auto* test_vecx_invalid = new palgox::palgox_vecx(test_invalid_data);
+        CHECK_THROWS(test_vecx_one->subVecx(test_vecx_invalid));
+        delete test_vecx_one;
+        delete test_vecx_invalid;
+    }
+
+}
