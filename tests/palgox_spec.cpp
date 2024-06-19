@@ -344,3 +344,49 @@ TEST_CASE("PAlgoX_VecX search/ quickSort/ mergeSort Tests", "[single-file]") {
     }
 
 }
+
+TEST_CASE("PAlgoX_VecX filter/ andMap/ orMap Tests", "[single-file]") {
+    const std::vector<int> test_input_data = {1, 2, 3, 4, 5};
+
+    SECTION("Valid PAlgoX_VecX filter Test - value exists") {
+        const auto* test_vecx = new palgox::palgox_vecx(test_input_data);
+        const auto* expected_vecx = new palgox::palgox_vecx({3, 4, 5});
+        const palgox::palgox_vecx* output_vecx = nullptr;
+        CHECK_NOTHROW(output_vecx = test_vecx->filter([](const int num){return num > 2;}));
+        REQUIRE(output_vecx->getNumElems() == 3);
+        REQUIRE(output_vecx->isEqual(expected_vecx));
+        delete test_vecx;
+        delete expected_vecx;
+        delete output_vecx;
+    }
+
+    SECTION("Invalid PAlgoX_VecX filter Test") {
+        const auto* test_vecx = new palgox::palgox_vecx(test_input_data);
+        CHECK_THROWS(test_vecx->filter([](const int num){return num > 6;}));
+        delete test_vecx;
+    }
+
+    SECTION("Valid PAlgoX_VecX andMap True Case") {
+        const auto* test_vecx = new palgox::palgox_vecx(test_input_data);
+        REQUIRE(test_vecx->andMap([](const int num){return num > 0;}));
+        delete test_vecx;
+    }
+
+    SECTION("Valid PAlgoX_VecX andMap False Case") {
+        const auto* test_vecx = new palgox::palgox_vecx(test_input_data);
+        REQUIRE_FALSE(test_vecx->andMap([](const int num){return num > 4;}));
+        delete test_vecx;
+    }
+
+    SECTION("Valid PAlgoX_VecX orMap True Case") {
+        const auto* test_vecx = new palgox::palgox_vecx(test_input_data);
+        REQUIRE(test_vecx->orMap([](const int num){return num > 4;}));
+        delete test_vecx;
+    }
+
+    SECTION("Valid PAlgoX_VecX orMap False Case") {
+        const auto* test_vecx = new palgox::palgox_vecx(test_input_data);
+        REQUIRE_FALSE(test_vecx->orMap([](const int num){return num < 0;}));
+        delete test_vecx;
+    }
+}

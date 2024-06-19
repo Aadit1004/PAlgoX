@@ -289,12 +289,12 @@ void palgox::palgox_vecx::mergeSortHelper(std::vector<int>& arr, const int begin
     merge(arr, begin, mid, end);
 }
 
-void palgox::palgox_vecx::merge(std::vector<int>& arr, int left, int mid, int right) {
+void palgox::palgox_vecx::merge(std::vector<int>& arr, const int left, const int mid, const int right) {
     int const subArrayOne = mid - left + 1;
     int const subArrayTwo = right - mid;
 
-    auto *leftArray = new int[subArrayOne];
-    auto *rightArray = new int[subArrayTwo];
+    auto* leftArray = new int[subArrayOne];
+    auto* rightArray = new int[subArrayTwo];
 
     for (auto i = 0; i < subArrayOne; i++) {
         leftArray[i] = arr[left + i];
@@ -330,4 +330,73 @@ void palgox::palgox_vecx::merge(std::vector<int>& arr, int left, int mid, int ri
     }
     delete[] leftArray;
     delete[] rightArray;
+}
+
+palgox::palgox_vecx* palgox::palgox_vecx::filter(bool (*operation)(int)) const {
+    // SEQUENTIAL IMPLEMENTATION
+    // std::vector<int> result_vector;
+    // for (int i = 0; i < this->m_numElems; i++) {
+    //     if (operation(this->m_data[i])) result_vector.push_back(this->m_data[i]);
+    // }
+    // if (result_vector.empty()) {
+    //     throw palgoxException("Empty result output");
+    // }
+    // auto* result_vecx = new palgox_vecx(result_vector);
+    // return result_vecx;
+    std::vector<int> result_vector(this->m_numElems);
+    std::vector<int> result_indices(this->m_numElems, -1);
+    const int numThreads = static_cast<int>(std::thread::hardware_concurrency());
+    std::vector<std::thread> threads;
+    const int chunkSize = (this->m_numElems + numThreads - 1) / numThreads;
+    for (int t = 0; t < numThreads; ++t) {
+        int start = t * chunkSize;
+        int end = std::min(start + chunkSize, this->m_numElems);
+        threads.emplace_back([&, start, end]() {
+            for (int i = start; i < end; ++i) {
+                if (operation(this->m_data[i])) {
+                    result_indices[i] = i;
+                }
+            }
+        });
+    }
+    for (auto& thread : threads) {
+        thread.join();
+    }
+    int result_index = 0;
+    for (int i = 0; i < this->m_numElems; ++i) {
+        if (result_indices[i] != -1) {
+            result_vector[result_index++] = this->m_data[i];
+        }
+    }
+    result_vector.resize(result_index);
+    if (result_vector.empty()) {
+        throw palgoxException("Empty result output");
+    }
+    return new palgox_vecx(result_vector);
+}
+
+bool palgox::palgox_vecx::andMap(bool (*operation)(int)) const {
+    bool result = true;
+    for (int i = 0; i < this->m_numElems; i++) {
+        if (!operation(this->m_data[i])) {
+#pragma omp atomic write
+            result = false;
+#pragma omp cancel for
+        }
+    }
+#pragma omp cancellation point for
+    return result;
+}
+
+bool palgox::palgox_vecx::orMap(bool (*operation)(int)) const {
+    bool result = false;
+    for (int i = 0; i < this->m_numElems; i++) {
+        if (operation(this->m_data[i])) {
+#pragma omp atomic write
+            result = true;
+#pragma omp cancel for
+        }
+    }
+#pragma omp cancellation point for
+    return result;
 }
