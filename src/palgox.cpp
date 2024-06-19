@@ -333,18 +333,8 @@ void palgox::palgox_vecx::merge(std::vector<int>& arr, const int left, const int
 }
 
 palgox::palgox_vecx* palgox::palgox_vecx::filter(bool (*operation)(int)) const {
-    // SEQUENTIAL IMPLEMENTATION
-    // std::vector<int> result_vector;
-    // for (int i = 0; i < this->m_numElems; i++) {
-    //     if (operation(this->m_data[i])) result_vector.push_back(this->m_data[i]);
-    // }
-    // if (result_vector.empty()) {
-    //     throw palgoxException("Empty result output");
-    // }
-    // auto* result_vecx = new palgox_vecx(result_vector);
-    // return result_vecx;
     std::vector<int> result_vector(this->m_numElems);
-    std::vector<int> result_indices(this->m_numElems, -1);
+    std::vector result_indices(this->m_numElems, -1);
     const int numThreads = static_cast<int>(std::thread::hardware_concurrency());
     std::vector<std::thread> threads;
     const int chunkSize = (this->m_numElems + numThreads - 1) / numThreads;
@@ -354,7 +344,7 @@ palgox::palgox_vecx* palgox::palgox_vecx::filter(bool (*operation)(int)) const {
         threads.emplace_back([&, start, end]() {
             for (int i = start; i < end; ++i) {
                 if (operation(this->m_data[i])) {
-                    result_indices[i] = i;
+                    result_indices[i] = 1;
                 }
             }
         });
