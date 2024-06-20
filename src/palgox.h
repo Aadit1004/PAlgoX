@@ -9,6 +9,8 @@
 #include <omp.h>
 #include <thread>
 #include <algorithm>
+#include <functional>
+#include <numeric>
 
 namespace palgox {
     class palgoxException final : public std::exception {
@@ -26,6 +28,7 @@ namespace palgox {
         int m_numCol;
 
         bool isSameShape(const palgox_matx* other_matx) const;
+
         void applyOperation(const palgox_matx* other_matx, int (*operation)(int, int));
     public:
         explicit palgox_matx(const std::vector<std::vector<int>>& input_data);
@@ -66,6 +69,10 @@ namespace palgox {
         void mergeSortHelper(std::vector<int>& arr, int begin, int end);
 
         static void merge(std::vector<int>& arr, int left, int mid, int right);
+
+        static void findMinHelper(const std::vector<int>& data, int start, int end, int& min_elem);
+
+        static void findMaxHelper(const std::vector<int>& data, int start, int end, int& max_elem);
     public:
         explicit palgox_vecx(const std::vector<int>& input_data);
 

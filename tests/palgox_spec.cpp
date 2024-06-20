@@ -390,3 +390,67 @@ TEST_CASE("PAlgoX_VecX filter/ andMap/ orMap Tests", "[single-file]") {
         delete test_vecx;
     }
 }
+
+TEST_CASE("PAlgoX_VecX reduceLeft/ reduceRight/ findMin/ findMax Tests", "[single-file]") {
+    const std::vector test_input_data = {1, 2, 3, 4, 5};
+
+    SECTION("Valid PAlgoX_VecX reduceLeft Test") {
+        const auto* test_vecx = new palgox::palgox_vecx(test_input_data);
+        int result;
+        CHECK_NOTHROW(result = test_vecx->reduceLeft(10, [](const int a, const int b){return a + b;}));
+        REQUIRE(result == 25);
+        delete test_vecx;
+    }
+
+    SECTION("Valid PAlgoX_VecX reduceRight Test") {
+        const auto* test_vecx = new palgox::palgox_vecx(test_input_data);
+        int result;
+        CHECK_NOTHROW(result = test_vecx->reduceLeft(400, [](const int a, const int b){return a / b;}));
+        REQUIRE(result == 3);
+        delete test_vecx;
+    }
+
+    SECTION("Valid PAlgoX_VecX findMin Test") {
+        const auto* test_vecx = new palgox::palgox_vecx(test_input_data);
+        int result;
+        CHECK_NOTHROW(result = test_vecx->findMin());
+        REQUIRE(result == 1);
+        delete test_vecx;
+    }
+
+    SECTION("Valid PAlgoX_VecX findMax Test") {
+        const auto* test_vecx = new palgox::palgox_vecx(test_input_data);
+        int result;
+        CHECK_NOTHROW(result = test_vecx->findMax());
+        REQUIRE(result == 5);
+        delete test_vecx;
+    }
+}
+
+TEST_CASE("PAlgoX_VecX prefixSum/ suffixSum Tests", "[single-file]") {
+    const std::vector test_input_data = {1, 2, 3, 4, 5};
+
+    SECTION("Valid PAlgoX_VecX prefixSum Test") {
+        const auto* test_vecx = new palgox::palgox_vecx(test_input_data);
+        const auto* expected_vecx = new palgox::palgox_vecx({1, 3, 6, 10, 15});
+        const palgox::palgox_vecx* output_vecx = nullptr;
+        CHECK_NOTHROW(output_vecx = test_vecx->prefixSum());
+        REQUIRE(output_vecx->getNumElems() == 5);
+        REQUIRE(output_vecx->isEqual(expected_vecx));
+        delete test_vecx;
+        delete expected_vecx;
+        delete output_vecx;
+    }
+
+    SECTION("Valid PAlgoX_VecX suffixSum Test") {
+        const auto* test_vecx = new palgox::palgox_vecx(test_input_data);
+        const auto* expected_vecx = new palgox::palgox_vecx({15, 14, 12, 9, 5});
+        const palgox::palgox_vecx* output_vecx = nullptr;
+        CHECK_NOTHROW(output_vecx = test_vecx->suffixSum());
+        REQUIRE(output_vecx->getNumElems() == 5);
+        REQUIRE(output_vecx->isEqual(expected_vecx));
+        delete test_vecx;
+        delete expected_vecx;
+        delete output_vecx;
+    }
+}
