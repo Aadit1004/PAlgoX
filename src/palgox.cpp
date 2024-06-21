@@ -2,6 +2,334 @@
 
 /*
  *
+ *  PAlgoX_VecX implementations
+ *
+ */
+
+// Constructor 1
+palgox::palgox_vecx::palgox_vecx(const std::vector<int>& input_data) {
+    if (input_data.empty()) throw palgoxException("Input data is empty");
+    this->m_numElems = static_cast<int>(input_data.size());
+    this->m_data = input_data;
+}
+
+// Constructor 2
+palgox::palgox_vecx::palgox_vecx(const int size, int (*operation)(int)) {
+    if (size <= 0) throw palgoxException("Input size but be positive");
+    this->m_data.resize(size);
+#pragma omp parallel for
+    for (int i = 0; i < size; i++) {
+        this->m_data[i] = operation(i);
+    }
+    this->m_numElems = size;
+}
+
+bool palgox::palgox_vecx::isSameSize(const palgox_vecx* other_vecx) const {
+    return this->m_numElems == other_vecx->getNumElems();
+}
+
+bool palgox::palgox_vecx::isEqual(const palgox_vecx* other_vecx) const {
+    if (!this->isSameSize(other_vecx)) return false;
+    bool result = true;
+#pragma omp parallel for shared(result)
+    for (int idx = 0; idx < this->m_numElems; idx++) {
+        if (this->m_data[idx] != other_vecx->getValue(idx)) {
+#pragma omp critical
+            result = false;
+#pragma omp cancel for
+        }
+    }
+#pragma omp cancellation point for
+    return result;
+}
+
+int palgox::palgox_vecx::getNumElems() const {
+    return this->m_numElems;
+}
+
+int palgox::palgox_vecx::getValue(const int idx) const {
+    if (idx < 0 || idx > this->m_numElems - 1) {
+        throw palgoxException("Invalid index parameter");
+    }
+    return this->m_data[idx];
+}
+
+void palgox::palgox_vecx::applyOperation(int (*operation)(int)) {
+#pragma omp parallel for
+    for (int i = 0; i < this->m_numElems; i++) {
+        this->m_data[i] = operation(this->m_data[i]);
+    }
+}
+
+void palgox::palgox_vecx::addVecx(const palgox_vecx* other_vecx) {
+    if (!this->isSameSize(other_vecx)) {
+        throw palgoxException("Different number of elements");
+    }
+#pragma omp parallel for
+    for (int i = 0; i < this->m_numElems; i++) {
+        this->m_data[i] += other_vecx->getValue(i);
+    }
+}
+
+void palgox::palgox_vecx::subVecx(const palgox_vecx* other_vecx) {
+    if (!this->isSameSize(other_vecx)) {
+        throw palgoxException("Different number of elements");
+    }
+#pragma omp parallel for
+    for (int i = 0; i < this->m_numElems; i++) {
+        this->m_data[i] -= other_vecx->getValue(i);
+    }
+}
+
+int palgox::palgox_vecx::search(const int value) const {
+    int idx = -1;
+#pragma omp parallel for
+    for (int i = 0; i < this->m_numElems; i++) {
+        if (this->m_data[i] == value) {
+#pragma omp atomic write
+            idx = i;
+#pragma omp cancel for
+        }
+    }
+#pragma omp cancellation point for
+    return idx;
+}
+
+void palgox::palgox_vecx::quickSort() {
+    quickSortHelper(this->m_data, 0, this->m_numElems - 1);
+}
+
+void palgox::palgox_vecx::quickSortHelper(std::vector<int>& arr, const int low, const int high) {
+    if(low<high) {
+        const int mid = partition(arr,low,high);
+        std::thread leftThread(&palgox_vecx::quickSortHelper, this, std::ref(arr), low, mid - 1);
+        std::thread rightThread(&palgox_vecx::quickSortHelper, this, std::ref(arr), mid + 1, high);
+        leftThread.join();
+        rightThread.join();
+    }
+}
+
+int palgox::palgox_vecx::partition(std::vector<int>& arr, const int low, const int high) {
+    const int pivot = arr[high];
+    int i = low-1;
+    for (int j = low; j <= high - 1; j++) {
+        if(arr[j] < pivot) {
+            i++;
+            std::swap(arr[i],arr[j]);
+        }
+    }
+    std::swap(arr[i+1], arr[high]);
+    return (i+1);
+}
+
+void palgox::palgox_vecx::mergeSort() {
+    mergeSortHelper(this->m_data, 0, this->m_numElems - 1);
+}
+
+void palgox::palgox_vecx::mergeSortHelper(std::vector<int>& arr, const int begin, const int end) {
+    if (begin >= end) {
+        return;
+    }
+    const int mid = begin + (end - begin) / 2;
+    std::thread leftThread(&palgox_vecx::mergeSortHelper, this, std::ref(arr), begin, mid);
+    std::thread rightThread(&palgox_vecx::mergeSortHelper, this, std::ref(arr), mid + 1, end);
+    leftThread.join();
+    rightThread.join();
+    merge(arr, begin, mid, end);
+}
+
+void palgox::palgox_vecx::merge(std::vector<int>& arr, const int left, const int mid, const int right) {
+    int const subArrayOne = mid - left + 1;
+    int const subArrayTwo = right - mid;
+
+    auto* leftArray = new int[subArrayOne];
+    auto* rightArray = new int[subArrayTwo];
+
+    for (auto i = 0; i < subArrayOne; i++) {
+        leftArray[i] = arr[left + i];
+    }
+    for (auto j = 0; j < subArrayTwo; j++) {
+        rightArray[j] = arr[mid + 1 + j];
+    }
+
+    auto indexOfSubArrayOne = 0, indexOfSubArrayTwo = 0;
+    int indexOfMergedArray = left;
+
+    while (indexOfSubArrayOne < subArrayOne && indexOfSubArrayTwo < subArrayTwo) {
+        if (leftArray[indexOfSubArrayOne] <= rightArray[indexOfSubArrayTwo]) {
+            arr[indexOfMergedArray] = leftArray[indexOfSubArrayOne];
+            indexOfSubArrayOne++;
+        } else {
+            arr[indexOfMergedArray] = rightArray[indexOfSubArrayTwo];
+            indexOfSubArrayTwo++;
+        }
+        indexOfMergedArray++;
+    }
+
+    while (indexOfSubArrayOne < subArrayOne) {
+        arr[indexOfMergedArray] = leftArray[indexOfSubArrayOne];
+        indexOfSubArrayOne++;
+        indexOfMergedArray++;
+    }
+
+    while (indexOfSubArrayTwo < subArrayTwo) {
+        arr[indexOfMergedArray] = rightArray[indexOfSubArrayTwo];
+        indexOfSubArrayTwo++;
+        indexOfMergedArray++;
+    }
+    delete[] leftArray;
+    delete[] rightArray;
+}
+
+palgox::palgox_vecx* palgox::palgox_vecx::filter(bool (*operation)(int)) const {
+    std::vector<int> result_vector(this->m_numElems);
+    std::vector result_indices(this->m_numElems, -1);
+    const int numThreads = static_cast<int>(std::thread::hardware_concurrency());
+    std::vector<std::thread> threads;
+    const int chunkSize = (this->m_numElems + numThreads - 1) / numThreads;
+    for (int t = 0; t < numThreads; ++t) {
+        int start = t * chunkSize;
+        int end = std::min(start + chunkSize, this->m_numElems);
+        threads.emplace_back([&, start, end]() {
+            for (int i = start; i < end; ++i) {
+                if (operation(this->m_data[i])) {
+                    result_indices[i] = 1;
+                }
+            }
+        });
+    }
+    for (auto& thread : threads) {
+        thread.join();
+    }
+    int result_index = 0;
+    for (int i = 0; i < this->m_numElems; ++i) {
+        if (result_indices[i] != -1) {
+            result_vector[result_index++] = this->m_data[i];
+        }
+    }
+    result_vector.resize(result_index);
+    if (result_vector.empty()) {
+        throw palgoxException("Empty result output");
+    }
+    return new palgox_vecx(result_vector);
+}
+
+bool palgox::palgox_vecx::andMap(bool (*operation)(int)) const {
+    bool result = true;
+    for (int i = 0; i < this->m_numElems; i++) {
+        if (!operation(this->m_data[i])) {
+#pragma omp atomic write
+            result = false;
+#pragma omp cancel for
+        }
+    }
+#pragma omp cancellation point for
+    return result;
+}
+
+bool palgox::palgox_vecx::orMap(bool (*operation)(int)) const {
+    bool result = false;
+    for (int i = 0; i < this->m_numElems; i++) {
+        if (operation(this->m_data[i])) {
+#pragma omp atomic write
+            result = true;
+#pragma omp cancel for
+        }
+    }
+#pragma omp cancellation point for
+    return result;
+}
+
+void palgox::palgox_vecx::findMinHelper(const std::vector<int>& data, const int start, const int end, int& min_elem) {
+    min_elem = INT32_MAX;
+    for (int i = start; i < end; i++) {
+        min_elem = std::min(min_elem, data[i]);
+    }
+}
+
+int palgox::palgox_vecx::findMin() const {
+    const int numThreads = static_cast<int>(std::thread::hardware_concurrency());
+    const int chunkSize = (m_numElems + numThreads - 1) / numThreads;
+    std::vector<std::thread> threads(numThreads);
+    std::vector results(numThreads, INT32_MAX);
+
+    for (int t = 0; t < numThreads; t++) {
+        int start = t * chunkSize;
+        int end = std::min(start + chunkSize, m_numElems);
+        threads[t] = std::thread(&palgox_vecx::findMinHelper, this->m_data, start, end, std::ref(results[t]));
+    }
+
+    for (auto& thread : threads) {
+        thread.join();
+    }
+
+    return *std::min_element(results.begin(), results.end());
+}
+
+void palgox::palgox_vecx::findMaxHelper(const std::vector<int>& data, const int start, const int end, int& max_elem) {
+    max_elem = INT32_MIN;
+    for (int i = start; i < end; i++) {
+        max_elem = std::max(max_elem, data[i]);
+    }
+}
+
+int palgox::palgox_vecx::findMax() const {
+    const int numThreads = static_cast<int>(std::thread::hardware_concurrency());
+    const int chunkSize = (m_numElems + numThreads - 1) / numThreads;
+    std::vector<std::thread> threads(numThreads);
+    std::vector results(numThreads, INT32_MIN);
+
+    for (int t = 0; t < numThreads; t++) {
+        int start = t * chunkSize;
+        int end = std::min(start + chunkSize, m_numElems);
+        threads[t] = std::thread(&palgox_vecx::findMaxHelper, this->m_data, start, end, std::ref(results[t]));
+    }
+
+    for (auto& thread : threads) {
+        thread.join();
+    }
+
+    return *std::max_element(results.begin(), results.end());
+}
+
+int palgox::palgox_vecx::reduceLeft(const int init, int (*operation)(int, int)) const {
+    // TODO: SEQUENTIAL VERSION, make multithreaded ?
+    int result = init;
+    for (int i = 0; i < this->m_numElems; i++) {
+        result = operation(result, m_data[i]);
+    }
+    return result;
+}
+
+int palgox::palgox_vecx::reduceRight(const int init, int (*operation)(int, int)) const {
+    // TODO: SEQUENTIAL VERSION, make multithreaded ?
+    int result = init;
+    for (int i = this->m_numElems - 1; i >= 0; i--) {
+        result = operation(result, m_data[i]);
+    }
+    return result;
+}
+
+palgox::palgox_vecx* palgox::palgox_vecx::prefixSum() const {
+    // TODO: SEQUENTIAL VERSION, make multithreaded ?
+    std::vector result_vector(this->m_numElems, this->m_data[0]);
+    for (int i = 1; i < this->m_numElems; i++) {
+        result_vector[i] = result_vector[i - 1] + this->m_data[i];
+    }
+    return new palgox_vecx(result_vector);
+}
+
+palgox::palgox_vecx* palgox::palgox_vecx::suffixSum() const {
+    // TODO: SEQUENTIAL VERSION, make multithreaded ?
+    std::vector result_vector(this->m_numElems, this->m_data[this->m_numElems - 1]);
+    for (int i = this->m_numElems - 2; i >= 0; i--) {
+        result_vector[i] = result_vector[i + 1] + this->m_data[i];
+    }
+    return new palgox_vecx(result_vector);
+}
+
+/*
+ *
  *  PAlgoX_MatX implementations
  *
  */
@@ -147,318 +475,6 @@ bool palgox::palgox_matx::orMap(bool (*operation)(int)) const {
 
 /*
  *
- *  PAlgoX_VecX implementations
+ *  PAlgoX_GraphX implementations
  *
  */
-
-// Constructor 1
-palgox::palgox_vecx::palgox_vecx(const std::vector<int>& input_data) {
-    if (input_data.empty()) throw palgoxException("Input data is empty");
-    this->m_numElems = static_cast<int>(input_data.size());
-    this->m_data = input_data;
-}
-
-// Constructor 2
-palgox::palgox_vecx::palgox_vecx(const int size, int (*operation)(int)) {
-    if (size <= 0) throw palgoxException("Input size but be positive");
-    this->m_data.resize(size);
-#pragma omp parallel for
-    for (int i = 0; i < size; i++) {
-        this->m_data[i] = operation(i);
-    }
-    this->m_numElems = size;
-}
-
-bool palgox::palgox_vecx::isSameSize(const palgox_vecx* other_vecx) const {
-    return this->m_numElems == other_vecx->getNumElems();
-}
-
-bool palgox::palgox_vecx::isEqual(const palgox_vecx* other_vecx) const {
-    if (!this->isSameSize(other_vecx)) return false;
-    bool result = true;
-#pragma omp parallel for shared(result)
-    for (int idx = 0; idx < this->m_numElems; idx++) {
-        if (this->m_data[idx] != other_vecx->getValue(idx)) {
-#pragma omp critical
-            result = false;
-#pragma omp cancel for
-        }
-    }
-#pragma omp cancellation point for
-    return result;
-}
-
-int palgox::palgox_vecx::getNumElems() const {
-    return this->m_numElems;
-}
-
-int palgox::palgox_vecx::getValue(const int idx) const {
-    if (idx < 0 || idx > this->m_numElems - 1) {
-        throw palgoxException("Invalid index parameter");
-    }
-    return this->m_data[idx];
-}
-
-void palgox::palgox_vecx::applyOperation(int (*operation)(int)) {
-#pragma omp parallel for
-    for (int i = 0; i < this->m_numElems; i++) {
-        this->m_data[i] = operation(this->m_data[i]);
-    }
-}
-
-void palgox::palgox_vecx::addVecx(const palgox_vecx* other_vecx) {
-    if (!this->isSameSize(other_vecx)) {
-        throw palgoxException("Different number of elements");
-    }
-#pragma omp parallel for
-    for (int i = 0; i < this->m_numElems; i++) {
-        this->m_data[i] += other_vecx->getValue(i);
-    }
-}
-
-void palgox::palgox_vecx::subVecx(const palgox_vecx* other_vecx) {
-    if (!this->isSameSize(other_vecx)) {
-        throw palgoxException("Different number of elements");
-    }
-#pragma omp parallel for
-    for (int i = 0; i < this->m_numElems; i++) {
-        this->m_data[i] -= other_vecx->getValue(i);
-    }
-}
-
-int palgox::palgox_vecx::search(const int value) const {
-    int idx = -1;
-#pragma omp parallel for
-    for (int i = 0; i < this->m_numElems; i++) {
-        if (this->m_data[i] == value) {
-#pragma omp atomic write
-            idx = i;
-#pragma omp cancel for
-        }
-    }
-#pragma omp cancellation point for
-    return idx;
-}
-
-void palgox::palgox_vecx::quickSort() {
-    quickSortHelper(this->m_data, 0, this->m_numElems - 1);
-}
-
-void palgox::palgox_vecx::quickSortHelper(std::vector<int>& arr, const int low, const int high) {
-    if(low<high) {
-        const int mid = partition(arr,low,high);
-        std::thread leftThread(&palgox_vecx::quickSortHelper, this, std::ref(arr), low, mid - 1);
-        std::thread rightThread(&palgox_vecx::quickSortHelper, this, std::ref(arr), mid + 1, high);
-        leftThread.join();
-        rightThread.join();
-    }
-}
-
-int palgox::palgox_vecx::partition(std::vector<int>& arr, const int low, const int high) {
-    const int pivot = arr[high];
-    int i = low-1;
-    for (int j = low; j <= high - 1; j++) {
-        if(arr[j] < pivot) {
-            i++;
-            std::swap(arr[i],arr[j]);
-        }
-    }
-    std::swap(arr[i+1], arr[high]);
-    return (i+1);
-}
-
-void palgox::palgox_vecx::mergeSort() {
-    mergeSortHelper(this->m_data, 0, this->m_numElems - 1);
-}
-
-void palgox::palgox_vecx::mergeSortHelper(std::vector<int>& arr, const int begin, const int end) {
-    if (begin >= end) {
-        return;
-    }
-    const int mid = begin + (end - begin) / 2;
-
-    if (end - begin > 500) { // to not cause overhead with multiple threads
-        std::thread leftThread(&palgox_vecx::mergeSortHelper, this, std::ref(arr), begin, mid);
-        std::thread rightThread(&palgox_vecx::mergeSortHelper, this, std::ref(arr), mid + 1, end);
-        leftThread.join();
-        rightThread.join();
-    } else {
-        mergeSortHelper(arr, begin, mid);
-        mergeSortHelper(arr, mid + 1, end);
-    }
-    merge(arr, begin, mid, end);
-}
-
-void palgox::palgox_vecx::merge(std::vector<int>& arr, const int left, const int mid, const int right) {
-    int const subArrayOne = mid - left + 1;
-    int const subArrayTwo = right - mid;
-
-    auto* leftArray = new int[subArrayOne];
-    auto* rightArray = new int[subArrayTwo];
-
-    for (auto i = 0; i < subArrayOne; i++) {
-        leftArray[i] = arr[left + i];
-    }
-    for (auto j = 0; j < subArrayTwo; j++) {
-        rightArray[j] = arr[mid + 1 + j];
-    }
-
-    auto indexOfSubArrayOne = 0, indexOfSubArrayTwo = 0;
-    int indexOfMergedArray = left;
-
-    while (indexOfSubArrayOne < subArrayOne && indexOfSubArrayTwo < subArrayTwo) {
-        if (leftArray[indexOfSubArrayOne] <= rightArray[indexOfSubArrayTwo]) {
-            arr[indexOfMergedArray] = leftArray[indexOfSubArrayOne];
-            indexOfSubArrayOne++;
-        } else {
-            arr[indexOfMergedArray] = rightArray[indexOfSubArrayTwo];
-            indexOfSubArrayTwo++;
-        }
-        indexOfMergedArray++;
-    }
-
-    while (indexOfSubArrayOne < subArrayOne) {
-        arr[indexOfMergedArray] = leftArray[indexOfSubArrayOne];
-        indexOfSubArrayOne++;
-        indexOfMergedArray++;
-    }
-
-    while (indexOfSubArrayTwo < subArrayTwo) {
-        arr[indexOfMergedArray] = rightArray[indexOfSubArrayTwo];
-        indexOfSubArrayTwo++;
-        indexOfMergedArray++;
-    }
-    delete[] leftArray;
-    delete[] rightArray;
-}
-
-palgox::palgox_vecx* palgox::palgox_vecx::filter(bool (*operation)(int)) const {
-    std::vector<int> result_vector(this->m_numElems);
-    std::vector result_indices(this->m_numElems, -1);
-    const int numThreads = static_cast<int>(std::thread::hardware_concurrency());
-    std::vector<std::thread> threads;
-    const int chunkSize = (this->m_numElems + numThreads - 1) / numThreads;
-    for (int t = 0; t < numThreads; ++t) {
-        int start = t * chunkSize;
-        int end = std::min(start + chunkSize, this->m_numElems);
-        threads.emplace_back([&, start, end]() {
-            for (int i = start; i < end; ++i) {
-                if (operation(this->m_data[i])) {
-                    result_indices[i] = 1;
-                }
-            }
-        });
-    }
-    for (auto& thread : threads) {
-        thread.join();
-    }
-    int result_index = 0;
-    for (int i = 0; i < this->m_numElems; ++i) {
-        if (result_indices[i] != -1) {
-            result_vector[result_index++] = this->m_data[i];
-        }
-    }
-    result_vector.resize(result_index);
-    if (result_vector.empty()) {
-        throw palgoxException("Empty result output");
-    }
-    return new palgox_vecx(result_vector);
-}
-
-bool palgox::palgox_vecx::andMap(bool (*operation)(int)) const {
-    bool result = true;
-    for (int i = 0; i < this->m_numElems; i++) {
-        if (!operation(this->m_data[i])) {
-#pragma omp atomic write
-            result = false;
-#pragma omp cancel for
-        }
-    }
-#pragma omp cancellation point for
-    return result;
-}
-
-bool palgox::palgox_vecx::orMap(bool (*operation)(int)) const {
-    bool result = false;
-    for (int i = 0; i < this->m_numElems; i++) {
-        if (operation(this->m_data[i])) {
-#pragma omp atomic write
-            result = true;
-#pragma omp cancel for
-        }
-    }
-#pragma omp cancellation point for
-    return result;
-}
-
-int palgox::palgox_vecx::reduceLeft(const int init, int (*operation)(int, int)) const {
-    // TODO: SEQUENTIAL VERSION, make multithreaded
-    int result = init;
-    for (int i = 0; i < this->m_numElems; i++) {
-        result = operation(result, m_data[i]);
-    }
-    return result;
-}
-
-int palgox::palgox_vecx::reduceRight(const int init, int (*operation)(int, int)) const {
-    // TODO: SEQUENTIAL VERSION, make multithreaded
-    int result = init;
-    for (int i = this->m_numElems - 1; i >= 0; i--) {
-        result = operation(result, m_data[i]);
-    }
-    return result;
-}
-
-void palgox::palgox_vecx::findMinHelper(const std::vector<int>& data, const int start, const int end, int& min_elem) {
-    min_elem = INT32_MAX;
-    for (int i = start; i < end; i++) {
-        min_elem = std::min(min_elem, data[i]);
-    }
-}
-
-int palgox::palgox_vecx::findMin() const {
-    const int numThreads = static_cast<int>(std::thread::hardware_concurrency());
-    const int chunkSize = (m_numElems + numThreads - 1) / numThreads;
-    std::vector<std::thread> threads(numThreads);
-    std::vector results(numThreads, INT32_MAX);
-
-    for (int t = 0; t < numThreads; t++) {
-        int start = t * chunkSize;
-        int end = std::min(start + chunkSize, m_numElems);
-        threads[t] = std::thread(&palgox_vecx::findMinHelper, this->m_data, start, end, std::ref(results[t]));
-    }
-
-    for (auto& thread : threads) {
-        thread.join();
-    }
-
-    return *std::min_element(results.begin(), results.end());
-}
-
-void palgox::palgox_vecx::findMaxHelper(const std::vector<int>& data, const int start, const int end, int& max_elem) {
-    max_elem = INT32_MIN;
-    for (int i = start; i < end; i++) {
-        max_elem = std::max(max_elem, data[i]);
-    }
-}
-
-int palgox::palgox_vecx::findMax() const {
-    const int numThreads = static_cast<int>(std::thread::hardware_concurrency());
-    const int chunkSize = (m_numElems + numThreads - 1) / numThreads;
-    std::vector<std::thread> threads(numThreads);
-    std::vector results(numThreads, INT32_MIN);
-
-    for (int t = 0; t < numThreads; t++) {
-        int start = t * chunkSize;
-        int end = std::min(start + chunkSize, m_numElems);
-        threads[t] = std::thread(&palgox_vecx::findMaxHelper, this->m_data, start, end, std::ref(results[t]));
-    }
-
-    for (auto& thread : threads) {
-        thread.join();
-    }
-
-    return *std::max_element(results.begin(), results.end());
-}
-
-// TODO: last 2 implementations
