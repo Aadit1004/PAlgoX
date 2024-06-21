@@ -454,3 +454,7 @@ TEST_CASE("PAlgoX_MatX andMap and orMap Tests", "[single-file]") {
         delete test_matx;
     }
 }
+
+/*
+ * PAlgoX_GraphX unit tests
+ */

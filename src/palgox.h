@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <functional>
 #include <numeric>
+#include <mutex>
 
 namespace palgox {
     class palgoxException final : public std::exception {
@@ -118,9 +119,33 @@ namespace palgox {
 
     class palgox_graphx {
     private:
-
+        std::unordered_map<int, std::vector<int>> m_adjList;
+        int m_numVertices;
+        int m_numEdges;
+        std::mutex mtx;
     public:
+
+        explicit palgox_graphx(int numVertices);
+
+        void addEdge(int src, int dest);
+
+        bool isEqual(const palgox_graphx* other_graphx) const;
+
+        palgox_vecx* DFS(int startVertex);
+
+        palgox_vecx* BFS(int startVertex);
+
+        palgox_vecx* shortestPath(int startVertex, int targetVertex);
+
+        bool hasCycle();
+
+        palgox_vecx* topologicalSort();
+
+        palgox_matx* connectedComponents(); // kosaraju algorithm
+
     };
+
+    // TODO: static class math utils
 }
 
 #endif //PALGOX_LIBRARY_H

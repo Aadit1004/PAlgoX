@@ -15,7 +15,7 @@ palgox::palgox_vecx::palgox_vecx(const std::vector<int>& input_data) {
 
 // Constructor 2
 palgox::palgox_vecx::palgox_vecx(const int size, int (*operation)(int)) {
-    if (size <= 0) throw palgoxException("Input size but be positive");
+    if (size <= 0) throw palgoxException("Input size must be positive");
     this->m_data.resize(size);
 #pragma omp parallel for
     for (int i = 0; i < size; i++) {
@@ -478,3 +478,10 @@ bool palgox::palgox_matx::orMap(bool (*operation)(int)) const {
  *  PAlgoX_GraphX implementations
  *
  */
+palgox::palgox_graphx::palgox_graphx(const int numVertices) {
+    if (numVertices <= 0) {
+        throw palgoxException("Input size must be positive");
+    }
+    this->m_numVertices = numVertices;
+    this->m_numEdges = 0;
+}
