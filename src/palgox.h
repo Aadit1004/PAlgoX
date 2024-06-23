@@ -127,7 +127,11 @@ namespace palgox {
 
         explicit palgox_graphx(int numVertices);
 
-        void addEdge(int src, int dest);
+        void addEdge(int src_node, int dest_node);
+
+        palgox_vecx* getNeighboringNodes(int node) const;
+
+        int getNumVertices() const;
 
         bool isEqual(const palgox_graphx* other_graphx) const;
 

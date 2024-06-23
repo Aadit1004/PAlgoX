@@ -484,4 +484,48 @@ palgox::palgox_graphx::palgox_graphx(const int numVertices) {
     }
     this->m_numVertices = numVertices;
     this->m_numEdges = 0;
+    for (int i = 0; i < this->m_numVertices; i++) {
+        this->m_adjList[i] = std::vector<int>();
+    }
+}
+
+void palgox::palgox_graphx::addEdge(const int src_node, const int dest_node) {
+    if (this->m_adjList.find(src_node) == this->m_adjList.end() || this->m_adjList.find(dest_node) == this->m_adjList.end()) {
+        throw palgoxException("Invalid source or destination node");
+    }
+    this->m_adjList[src_node].push_back(dest_node);
+    this->m_adjList[dest_node].push_back(src_node);
+    this->m_numEdges++;
+}
+
+palgox::palgox_vecx* palgox::palgox_graphx::getNeighboringNodes(const int node) const {
+    if (this->m_adjList.find(node) == this->m_adjList.end()) {
+        throw palgoxException("Invalid parameter node");
+    }
+    return new palgox_vecx(this->m_adjList.at(node));
+}
+
+int palgox::palgox_graphx::getNumVertices() const {
+    return this->m_numVertices;
+}
+
+bool palgox::palgox_graphx::isEqual(const palgox_graphx* other_graphx) const {
+    // TODO: SEQUENTIAL VERSION. make multithreaded
+    if (this->m_numVertices != other_graphx->getNumVertices()) return false;
+    for (int i = 0; i < this->m_numVertices; i++) {
+        const palgox_vecx* other_vec = other_graphx->getNeighboringNodes(i);
+        if (this->m_adjList.at(i).size() != other_vec->getNumElems()) {
+            delete other_vec;
+            return false;
+        }
+        const auto& neighbors = this->m_adjList.at(i);
+        for (int j = 0; j < neighbors.size(); ++j) {
+            if (neighbors[j] != other_vec->getValue(j)) {
+                delete other_vec;
+                return false;
+            }
+        }
+        delete other_vec;
+    }
+    return true;
 }
