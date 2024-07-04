@@ -529,3 +529,77 @@ bool palgox::palgox_graphx::isEqual(const palgox_graphx* other_graphx) const {
     }
     return true;
 }
+
+palgox::palgox_vecx* palgox::palgox_graphx::BFS(const int startVertex) {
+    // TODO: SEQUENTIAL VERSION. make multithreaded
+    if (this->m_adjList.find(startVertex) == this->m_adjList.end()) {
+        throw palgoxException("Invalid start vertex");
+    }
+    std::vector<bool> visited(this->m_numVertices, false);
+    std::queue<int> q;
+    std::vector<int> bfsOrder;
+
+    q.push(startVertex);
+    visited[startVertex] = true;
+
+    while (!q.empty()) {
+        int vertex = q.front();
+        q.pop();
+        bfsOrder.push_back(vertex);
+
+        for (const int& neighbor : this->m_adjList[vertex]) {
+            if (!visited[neighbor]) {
+                q.push(neighbor);
+                visited[neighbor] = true;
+            }
+        }
+    }
+
+    return new palgox_vecx(bfsOrder);
+}
+
+palgox::palgox_vecx* palgox::palgox_graphx::DFS(const int startVertex) {
+    // TODO: SEQUENTIAL VERSION. make multithreaded
+    if (this->m_adjList.find(startVertex) == this->m_adjList.end()) {
+        throw palgoxException("Invalid start vertex");
+    }
+    std::vector<bool> visited(this->m_numVertices, false);
+    std::stack<int> stk;
+    std::vector<int> dfsOrder;
+
+    stk.push(startVertex);
+
+    while (!stk.empty()) {
+        int vertex = stk.top();
+        stk.pop();
+
+        if (!visited[vertex]) {
+            dfsOrder.push_back(vertex);
+            visited[vertex] = true;
+
+            for (const int& neighbor : this->m_adjList[vertex]) {
+                if (!visited[neighbor]) {
+                    stk.push(neighbor);
+                }
+            }
+        }
+    }
+
+    return new palgox_vecx(dfsOrder);
+}
+
+palgox::palgox_vecx* palgox::palgox_graphx::shortestPath(int startVertex, int targetVertex) {
+    // TODO
+}
+
+bool palgox::palgox_graphx::hasCycle() {
+    // TODO
+}
+
+palgox::palgox_vecx* palgox::palgox_graphx::topologicalSort() {
+    // TODO
+}
+
+palgox::palgox_matx* palgox::palgox_graphx::connectedComponents() {
+    // TODO
+}

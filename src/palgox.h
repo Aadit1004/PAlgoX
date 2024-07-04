@@ -12,6 +12,8 @@
 #include <functional>
 #include <numeric>
 #include <mutex>
+#include <queue>
+#include <stack>
 
 namespace palgox {
     class palgoxException final : public std::exception {
