@@ -484,6 +484,7 @@ palgox::palgox_graphx::palgox_graphx(const int numVertices) {
     }
     this->m_numVertices = numVertices;
     this->m_numEdges = 0;
+#pragma omp parallel for
     for (int i = 0; i < this->m_numVertices; i++) {
         this->m_adjList[i] = std::vector<int>();
     }
@@ -530,14 +531,16 @@ bool palgox::palgox_graphx::isEqual(const palgox_graphx* other_graphx) const {
     return true;
 }
 
-palgox::palgox_vecx* palgox::palgox_graphx::BFS(const int startVertex) {
+
+palgox::palgox_vecx* palgox::palgox_graphx::shortestPath(const int startVertex, const int targetVertex) {
     // TODO: SEQUENTIAL VERSION. make multithreaded
-    if (this->m_adjList.find(startVertex) == this->m_adjList.end()) {
-        throw palgoxException("Invalid start vertex");
+    if (this->m_adjList.find(startVertex) == this->m_adjList.end() || this->m_adjList.find(targetVertex) == this->m_adjList.end()) {
+        throw palgoxException("Invalid start or target vertex");
     }
+
     std::vector<bool> visited(this->m_numVertices, false);
+    std::vector<int> previous(this->m_numVertices, -1);
     std::queue<int> q;
-    std::vector<int> bfsOrder;
 
     q.push(startVertex);
     visited[startVertex] = true;
@@ -545,61 +548,93 @@ palgox::palgox_vecx* palgox::palgox_graphx::BFS(const int startVertex) {
     while (!q.empty()) {
         int vertex = q.front();
         q.pop();
-        bfsOrder.push_back(vertex);
+
+        if (vertex == targetVertex) {
+            std::vector<int> path;
+            for (int at = targetVertex; at != -1; at = previous[at]) {
+                path.push_back(at);
+            }
+            std::reverse(path.begin(), path.end());
+            return new palgox_vecx(path);
+        }
 
         for (const int& neighbor : this->m_adjList[vertex]) {
             if (!visited[neighbor]) {
                 q.push(neighbor);
                 visited[neighbor] = true;
+                previous[neighbor] = vertex;
             }
         }
     }
 
-    return new palgox_vecx(bfsOrder);
-}
-
-palgox::palgox_vecx* palgox::palgox_graphx::DFS(const int startVertex) {
-    // TODO: SEQUENTIAL VERSION. make multithreaded
-    if (this->m_adjList.find(startVertex) == this->m_adjList.end()) {
-        throw palgoxException("Invalid start vertex");
-    }
-    std::vector<bool> visited(this->m_numVertices, false);
-    std::stack<int> stk;
-    std::vector<int> dfsOrder;
-
-    stk.push(startVertex);
-
-    while (!stk.empty()) {
-        int vertex = stk.top();
-        stk.pop();
-
-        if (!visited[vertex]) {
-            dfsOrder.push_back(vertex);
-            visited[vertex] = true;
-
-            for (const int& neighbor : this->m_adjList[vertex]) {
-                if (!visited[neighbor]) {
-                    stk.push(neighbor);
-                }
-            }
-        }
-    }
-
-    return new palgox_vecx(dfsOrder);
-}
-
-palgox::palgox_vecx* palgox::palgox_graphx::shortestPath(int startVertex, int targetVertex) {
-    // TODO
+    // no path was found
+    const std::vector<int> empty_path;
+    return new palgox_vecx(empty_path);
 }
 
 bool palgox::palgox_graphx::hasCycle() {
-    // TODO
+    // TODO: SEQUENTIAL VERSION. make multithreaded
+    std::vector<bool> visited(this->m_numVertices, false);
+    for (int vertex = 0; vertex < this->m_numVertices; vertex++) {
+        if (!visited[vertex]) {
+            if (this->hasCycleHelper(vertex, visited, -1)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool palgox::palgox_graphx::hasCycleHelper(const int vertex, std::vector<bool>& visited, const int parent) {
+    // TODO: SEQUENTIAL VERSION. make multithreaded
+    visited[vertex] = true;
+    for (const int& neighbor : this->m_adjList[vertex]) {
+        if (!visited[neighbor]) {
+            if (this->hasCycleHelper(neighbor, visited, vertex)) {
+                return true;
+            }
+        } else if (neighbor != parent) {
+            return true;
+        }
+    }
+    return false;
 }
 
 palgox::palgox_vecx* palgox::palgox_graphx::topologicalSort() {
-    // TODO
+    std::vector<bool> visited(this->m_numVertices, false);
+    std::stack<int> stk;
+
+    // helper dfs function
+    auto dfs = [&](const int vertex, auto&& dfs) -> void {
+        visited[vertex] = true;
+
+        for (const int& neighbor : this->m_adjList[vertex]) {
+            if (!visited[neighbor]) {
+                dfs(neighbor, dfs);
+            }
+        }
+
+        // push current vertex after visiting all its neighbors
+        stk.push(vertex);
+    };
+
+    // Perform DFS for all vertices
+    for (int i = 0; i < this->m_numVertices; i++) {
+        if (!visited[i]) {
+            dfs(i, dfs);
+        }
+    }
+
+    // pop to get the topological order
+    std::vector<int> topoOrder;
+    while (!stk.empty()) {
+        topoOrder.push_back(stk.top());
+        stk.pop();
+    }
+
+    return new palgox_vecx(topoOrder);
 }
 
-palgox::palgox_matx* palgox::palgox_graphx::connectedComponents() {
+int palgox::palgox_graphx::getNumConnectedComponents() {
     // TODO
 }

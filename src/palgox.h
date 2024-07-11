@@ -125,6 +125,8 @@ namespace palgox {
         int m_numVertices;
         int m_numEdges;
         std::mutex mtx;
+
+        bool palgox::palgox_graphx::hasCycleHelper(int vertex, std::vector<bool>& visited, int parent);
     public:
 
         explicit palgox_graphx(int numVertices);
@@ -147,7 +149,7 @@ namespace palgox {
 
         palgox_vecx* topologicalSort();
 
-        palgox_matx* connectedComponents(); // kosaraju algorithm
+        int getNumConnectedComponents(); // kosaraju algorithm
 
     };
 
