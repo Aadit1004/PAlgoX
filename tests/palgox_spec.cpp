@@ -458,3 +458,52 @@ TEST_CASE("PAlgoX_MatX andMap and orMap Tests", "[single-file]") {
 /*
  * PAlgoX_GraphX unit tests
  */
+TEST_CASE( "PAlgoX_GraphX Constructor Tests", "[single-file]" ) {
+
+    SECTION("Valid PAlgoX_GraphX Constructor Test") {
+        palgox::palgox_graphx* test_graph;
+        CHECK_NOTHROW(test_graph = new palgox::palgox_graphx(5));
+        REQUIRE(test_graph->getNumVertices() == 5);
+        delete test_graph;
+    }
+
+    SECTION("Invalid PAlgoX_GraphX Constructor Test - Nonpositive Param") {
+        palgox::palgox_graphx* test_graph;
+        CHECK_THROWS(test_graph = new palgox::palgox_graphx(-10));
+    }
+}
+
+TEST_CASE( "PAlgoX_GraphX isEqual Tests", "[single-file]" ) {
+
+    SECTION("Valid PAlgoX_GraphX isEqual Test - True Case") {
+        auto* test_graph = new palgox::palgox_graphx(4);
+        auto* test_graph_two = new palgox::palgox_graphx(4);
+        test_graph->addEdge(1, 2);
+        test_graph->addEdge(0, 3);
+        test_graph->addEdge(3, 2);
+        test_graph->addEdge(2, 2);
+        test_graph_two->addEdge(1, 2);
+        test_graph_two->addEdge(0, 3);
+        test_graph_two->addEdge(3, 2);
+        test_graph_two->addEdge(2, 2);
+        REQUIRE(test_graph->isEqual(test_graph_two));
+        delete test_graph;
+        delete test_graph_two;
+    }
+
+    SECTION("Valid PAlgoX_GraphX isEqual Test - False Case") {
+        auto* test_graph = new palgox::palgox_graphx(4);
+        auto* test_graph_two = new palgox::palgox_graphx(4);
+        test_graph->addEdge(1, 2);
+        test_graph->addEdge(0, 3);
+        test_graph->addEdge(3, 2);
+        test_graph->addEdge(2, 2);
+        test_graph_two->addEdge(1, 2);
+        test_graph_two->addEdge(1, 3);
+        test_graph_two->addEdge(3, 2);
+        test_graph_two->addEdge(2, 2);
+        REQUIRE_FALSE(test_graph->isEqual(test_graph_two));
+        delete test_graph;
+        delete test_graph_two;
+    }
+}

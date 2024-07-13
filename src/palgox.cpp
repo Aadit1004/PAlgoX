@@ -486,7 +486,7 @@ palgox::palgox_graphx::palgox_graphx(const int numVertices) {
     this->m_numEdges = 0;
 #pragma omp parallel for
     for (int i = 0; i < this->m_numVertices; i++) {
-        this->m_adjList[i] = std::vector<int>();
+        this->m_adjList[i] = std::unordered_set<int>();
     }
 }
 
@@ -494,16 +494,18 @@ void palgox::palgox_graphx::addEdge(const int src_node, const int dest_node) {
     if (this->m_adjList.find(src_node) == this->m_adjList.end() || this->m_adjList.find(dest_node) == this->m_adjList.end()) {
         throw palgoxException("Invalid source or destination node");
     }
-    this->m_adjList[src_node].push_back(dest_node);
-    this->m_adjList[dest_node].push_back(src_node);
-    this->m_numEdges++;
+    if (this->m_adjList[src_node].find(dest_node) == this->m_adjList[src_node].end()) {
+        this->m_adjList[src_node].insert(dest_node);
+        this->m_adjList[dest_node].insert(src_node);
+        this->m_numEdges++;
+    }
 }
 
-palgox::palgox_vecx* palgox::palgox_graphx::getNeighboringNodes(const int node) const {
+std::unordered_set<int> palgox::palgox_graphx::getNeighboringNodes(const int node) const {
     if (this->m_adjList.find(node) == this->m_adjList.end()) {
         throw palgoxException("Invalid parameter node");
     }
-    return new palgox_vecx(this->m_adjList.at(node));
+    return this->m_adjList.at(node);
 }
 
 int palgox::palgox_graphx::getNumVertices() const {
@@ -511,26 +513,36 @@ int palgox::palgox_graphx::getNumVertices() const {
 }
 
 bool palgox::palgox_graphx::isEqual(const palgox_graphx* other_graphx) const {
-    // TODO: SEQUENTIAL VERSION. make multithreaded
     if (this->m_numVertices != other_graphx->getNumVertices()) return false;
+    bool result = true;
+#pragma omp parallel for shared(result)
     for (int i = 0; i < this->m_numVertices; i++) {
-        const palgox_vecx* other_vec = other_graphx->getNeighboringNodes(i);
-        if (this->m_adjList.at(i).size() != other_vec->getNumElems()) {
-            delete other_vec;
-            return false;
+        if (!result) continue;
+        const std::unordered_set<int>& other_neighbors = other_graphx->getNeighboringNodes(i);
+        if (this->m_adjList.at(i).size() != other_neighbors.size()) {
+            // inconsistent neighboring nodes size
+#pragma omp critical
+            {
+                result = false;
+            }
+            continue;
         }
         const auto& neighbors = this->m_adjList.at(i);
-        for (int j = 0; j < neighbors.size(); ++j) {
-            if (neighbors[j] != other_vec->getValue(j)) {
-                delete other_vec;
-                return false;
+        for (const int& neighbor : neighbors) {
+            if (other_neighbors.find(neighbor) == other_neighbors.end()) {
+#pragma omp critical
+                {
+                    result = false;
+                }
+                break;
             }
         }
-        delete other_vec;
+#pragma omp cancellation point for
     }
-    return true;
+    return result;
 }
 
+// TO FIX AFTER
 
 palgox::palgox_vecx* palgox::palgox_graphx::shortestPath(const int startVertex, const int targetVertex) {
     // TODO: SEQUENTIAL VERSION. make multithreaded
@@ -584,57 +596,58 @@ bool palgox::palgox_graphx::hasCycle() {
     }
     return false;
 }
-
-bool palgox::palgox_graphx::hasCycleHelper(const int vertex, std::vector<bool>& visited, const int parent) {
-    // TODO: SEQUENTIAL VERSION. make multithreaded
-    visited[vertex] = true;
-    for (const int& neighbor : this->m_adjList[vertex]) {
-        if (!visited[neighbor]) {
-            if (this->hasCycleHelper(neighbor, visited, vertex)) {
-                return true;
-            }
-        } else if (neighbor != parent) {
-            return true;
-        }
-    }
-    return false;
-}
-
-palgox::palgox_vecx* palgox::palgox_graphx::topologicalSort() {
-    std::vector<bool> visited(this->m_numVertices, false);
-    std::stack<int> stk;
-
-    // helper dfs function
-    auto dfs = [&](const int vertex, auto&& dfs) -> void {
-        visited[vertex] = true;
-
-        for (const int& neighbor : this->m_adjList[vertex]) {
-            if (!visited[neighbor]) {
-                dfs(neighbor, dfs);
-            }
-        }
-
-        // push current vertex after visiting all its neighbors
-        stk.push(vertex);
-    };
-
-    // Perform DFS for all vertices
-    for (int i = 0; i < this->m_numVertices; i++) {
-        if (!visited[i]) {
-            dfs(i, dfs);
-        }
-    }
-
-    // pop to get the topological order
-    std::vector<int> topoOrder;
-    while (!stk.empty()) {
-        topoOrder.push_back(stk.top());
-        stk.pop();
-    }
-
-    return new palgox_vecx(topoOrder);
-}
-
-int palgox::palgox_graphx::getNumConnectedComponents() {
-    // TODO
-}
+//
+// bool palgox::palgox_graphx::hasCycleHelper(const int vertex, std::vector<bool>& visited, const int parent) {
+//     // TODO: SEQUENTIAL VERSION. make multithreaded
+//     visited[vertex] = true;
+//     for (const int& neighbor : this->m_adjList[vertex]) {
+//         if (!visited[neighbor]) {
+//             if (this->hasCycleHelper(neighbor, visited, vertex)) {
+//                 return true;
+//             }
+//         } else if (neighbor != parent) {
+//             return true;
+//         }
+//     }
+//     return false;
+// }
+//
+// palgox::palgox_vecx* palgox::palgox_graphx::topologicalSort() {
+//     std::vector<bool> visited(this->m_numVertices, false);
+//     std::stack<int> stk;
+//
+//     // helper dfs function
+//     auto dfs = [&](const int vertex, auto&& dfs) -> void {
+//         visited[vertex] = true;
+//
+//         for (const int& neighbor : this->m_adjList[vertex]) {
+//             if (!visited[neighbor]) {
+//                 dfs(neighbor, dfs);
+//             }
+//         }
+//
+//         // push current vertex after visiting all its neighbors
+//         stk.push(vertex);
+//     };
+//
+//     // DFS for all vertices
+//     for (int i = 0; i < this->m_numVertices; i++) {
+//         if (!visited[i]) {
+//             dfs(i, dfs);
+//         }
+//     }
+//
+//     // pop to get the topological order
+//     std::vector<int> topoOrder;
+//     while (!stk.empty()) {
+//         topoOrder.push_back(stk.top());
+//         stk.pop();
+//     }
+//
+//     return new palgox_vecx(topoOrder);
+// }
+//
+// int palgox::palgox_graphx::getNumConnectedComponents() {
+//     // TODO
+//     return -1;
+// }

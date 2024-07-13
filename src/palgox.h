@@ -14,14 +14,15 @@
 #include <mutex>
 #include <queue>
 #include <stack>
+#include <unordered_set>
 
 namespace palgox {
     class palgoxException final : public std::exception {
     private:
-        std::string message;
+        std::string msg_;
     public:
-        explicit palgoxException(std::string msg) : message(std::move(msg)) {}
-        std::string what() { return message;}
+        explicit palgoxException(std::string msg) : msg_(std::move(msg)) {}
+        std::string what() { return this->msg_;}
     };
 
     class palgox_vecx {
@@ -121,19 +122,20 @@ namespace palgox {
 
     class palgox_graphx {
     private:
-        std::unordered_map<int, std::vector<int>> m_adjList;
+        std::unordered_map<int, std::unordered_set<int>> m_adjList;
         int m_numVertices;
         int m_numEdges;
         std::mutex mtx;
 
-        bool palgox::palgox_graphx::hasCycleHelper(int vertex, std::vector<bool>& visited, int parent);
+        bool hasCycleHelper(int vertex, std::vector<bool>& visited, int parent);
+
     public:
 
         explicit palgox_graphx(int numVertices);
 
         void addEdge(int src_node, int dest_node);
 
-        palgox_vecx* getNeighboringNodes(int node) const;
+        std::unordered_set<int> getNeighboringNodes(int node) const;
 
         int getNumVertices() const;
 
@@ -149,7 +151,7 @@ namespace palgox {
 
         palgox_vecx* topologicalSort();
 
-        int getNumConnectedComponents(); // kosaraju algorithm
+        int getNumConnectedComponents(); // kosaraju algorithm?
 
     };
 
