@@ -141,10 +141,6 @@ namespace palgox {
 
         bool isEqual(const palgox_graphx* other_graphx) const;
 
-        palgox_vecx* DFS(int startVertex);
-
-        palgox_vecx* BFS(int startVertex);
-
         palgox_vecx* shortestPath(int startVertex, int targetVertex);
 
         bool hasCycle();

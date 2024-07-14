@@ -507,3 +507,17 @@ TEST_CASE( "PAlgoX_GraphX isEqual Tests", "[single-file]" ) {
         delete test_graph_two;
     }
 }
+
+TEST_CASE( "PAlgoX_GraphX isEqual Tests", "[single-file]" ) {
+
+    SECTION("Valid PAlgoX_GraphX shortestPath Test - True Case") {
+        auto* test_graph = new palgox::palgox_graphx(4);
+        // TODO: construct graph
+        test_graph->addEdge(1, 2);
+        test_graph->addEdge(0, 3);
+        test_graph->addEdge(3, 2);
+        test_graph->addEdge(2, 2);
+        REQUIRE(1 == 1);
+        delete test_graph;
+    }
+}

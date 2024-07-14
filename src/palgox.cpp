@@ -556,7 +556,7 @@ palgox::palgox_vecx* palgox::palgox_graphx::shortestPath(const int startVertex, 
 
     q.push(startVertex);
     visited[startVertex] = true;
-
+    // run bfs alg
     while (!q.empty()) {
         int vertex = q.front();
         q.pop();
@@ -584,18 +584,18 @@ palgox::palgox_vecx* palgox::palgox_graphx::shortestPath(const int startVertex, 
     return new palgox_vecx(empty_path);
 }
 
-bool palgox::palgox_graphx::hasCycle() {
-    // TODO: SEQUENTIAL VERSION. make multithreaded
-    std::vector<bool> visited(this->m_numVertices, false);
-    for (int vertex = 0; vertex < this->m_numVertices; vertex++) {
-        if (!visited[vertex]) {
-            if (this->hasCycleHelper(vertex, visited, -1)) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
+// bool palgox::palgox_graphx::hasCycle() {
+//     // TODO: SEQUENTIAL VERSION. make multithreaded
+//     std::vector<bool> visited(this->m_numVertices, false);
+//     for (int vertex = 0; vertex < this->m_numVertices; vertex++) {
+//         if (!visited[vertex]) {
+//             if (this->hasCycleHelper(vertex, visited, -1)) {
+//                 return true;
+//             }
+//         }
+//     }
+//     return false;
+// }
 //
 // bool palgox::palgox_graphx::hasCycleHelper(const int vertex, std::vector<bool>& visited, const int parent) {
 //     // TODO: SEQUENTIAL VERSION. make multithreaded
