@@ -11,9 +11,10 @@
 #include <algorithm>
 #include <functional>
 #include <numeric>
-#include <mutex>
 #include <queue>
 #include <stack>
+#include <cmath>
+#include <random>
 #include <unordered_set>
 
 namespace palgox {
@@ -125,7 +126,6 @@ namespace palgox {
         std::unordered_map<int, std::unordered_set<int>> m_adjList;
         int m_numVertices;
         int m_numEdges;
-        std::mutex mtx;
 
         bool hasCycleHelper(int vertex, std::vector<bool>& visited, int parent);
 
@@ -141,17 +141,47 @@ namespace palgox {
 
         bool isEqual(const palgox_graphx* other_graphx) const;
 
-        palgox_vecx* shortestPath(int startVertex, int targetVertex);
-
         bool hasCycle();
-
-        palgox_vecx* topologicalSort();
-
-        int getNumConnectedComponents(); // kosaraju algorithm?
-
     };
 
-    // TODO: static class math utils
+
+    class palgox_mathx {
+    public:
+
+        static std::vector<int> computePowers(const std::vector<int>& bases, const std::vector<int>& exponents) {
+            std::vector<int> results(bases.size());
+#pragma omp parallel for
+            for (int i = 0; i < bases.size(); ++i) {
+                results[i] = static_cast<int>(std::pow(bases[i], exponents[i]));
+            }
+            return results;
+        }
+
+        static unsigned long long factorial(const unsigned int n) {
+            if (n == 0 || n == 1) return 1;
+            unsigned long long result = 1;
+#pragma omp parallel for reduction(*:result)
+            for (int i = 2; i <= n; ++i) {
+                result *= i;
+            }
+            return result;
+        }
+
+        static std::vector<bool> generatePrimes(unsigned int n) {
+            std::vector<bool> is_prime(n + 1, true);
+            is_prime[0] = is_prime[1] = false;
+            const int limit = static_cast<int>(std::sqrt(n));
+#pragma omp parallel for schedule(dynamic)
+            for (int i = 2; i <= limit; ++i) {
+                if (is_prime[i]) {
+                    for (int j = i * i; j <= n; j += i) {
+                        is_prime[j] = false;
+                    }
+                }
+            }
+            return is_prime;
+        }
+    };
 }
 
 #endif //PALGOX_LIBRARY_H

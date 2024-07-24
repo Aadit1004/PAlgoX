@@ -508,16 +508,75 @@ TEST_CASE( "PAlgoX_GraphX isEqual Tests", "[single-file]" ) {
     }
 }
 
-TEST_CASE( "PAlgoX_GraphX isEqual Tests", "[single-file]" ) {
+TEST_CASE( "PAlgoX_GraphX hasCyle Tests", "[single-file]" ) {
 
-    SECTION("Valid PAlgoX_GraphX shortestPath Test - True Case") {
+    SECTION("Valid PAlgoX_GraphX hasCyle Test - True Case") {
         auto* test_graph = new palgox::palgox_graphx(4);
-        // TODO: construct graph
+        test_graph->addEdge(0, 1);
         test_graph->addEdge(1, 2);
-        test_graph->addEdge(0, 3);
-        test_graph->addEdge(3, 2);
-        test_graph->addEdge(2, 2);
-        REQUIRE(1 == 1);
+        test_graph->addEdge(2, 0);
+        test_graph->addEdge(2, 3);
+        REQUIRE(test_graph->hasCycle());
         delete test_graph;
+    }
+
+    SECTION("Valid PAlgoX_GraphX hasCyle Test - False Case") {
+        auto* test_graph = new palgox::palgox_graphx(5);
+        test_graph->addEdge(0, 1);
+        test_graph->addEdge(1, 2);
+        test_graph->addEdge(2, 3);
+        test_graph->addEdge(3, 4);
+        REQUIRE_FALSE(test_graph->hasCycle());
+        delete test_graph;
+    }
+
+    SECTION("Valid PAlgoX_GraphX hasCyle Test - No Edges") {
+        auto* test_graph = new palgox::palgox_graphx(4);
+        REQUIRE_FALSE(test_graph->hasCycle());
+        delete test_graph;
+    }
+}
+
+/*
+ * PAlgoX_MathX unit tests
+ */
+TEST_CASE( "PAlgoX_MathX All Util Methods Tests", "[single-file]" ) {
+
+    SECTION("PAlgoX_MathX computePowers Test") {
+        std::vector<int> bases = {2, 3, 4};
+        std::vector<int> exponents = {3, 2, 1};
+        std::vector<int> expected_results = {8, 9, 4};
+        std::vector<int> results = palgox::palgox_mathx::computePowers(bases, exponents);
+        REQUIRE(results.size() == expected_results.size());
+        for (size_t i = 0; i < results.size(); ++i) {
+            REQUIRE(results[i] == expected_results[i]);
+        }
+    }
+
+    SECTION("PAlgoX_MathX factorial Test") {
+        REQUIRE(palgox::palgox_mathx::factorial(0) == 1);
+        REQUIRE(palgox::palgox_mathx::factorial(1) == 1);
+        REQUIRE(palgox::palgox_mathx::factorial(5) == 120);
+        REQUIRE(palgox::palgox_mathx::factorial(10) == 3628800);
+        REQUIRE(palgox::palgox_mathx::factorial(12) == 479001600);
+    }
+
+    SECTION("PAlgoX_MathX generatePrimes Test") {
+        // up to 10
+        std::vector<bool> expected_primes_10 = {false, false, true, true, false, true, false, true, false, false, false};
+        std::vector<bool> primes_10 = palgox::palgox_mathx::generatePrimes(10);
+        REQUIRE(primes_10.size() == expected_primes_10.size());
+        for (size_t i = 0; i < primes_10.size(); ++i) {
+            REQUIRE(primes_10[i] == expected_primes_10[i]);
+        }
+        // up to 100 (checks random)
+        std::vector<bool> primes_100 = palgox::palgox_mathx::generatePrimes(100);
+        REQUIRE(primes_100[2] == true);
+        REQUIRE(primes_100[3] == true);
+        REQUIRE(primes_100[4] == false);
+        REQUIRE(primes_100[59] == true);
+        REQUIRE(primes_100[83] == true);
+        REQUIRE(primes_100[97] == true);
+        REQUIRE(primes_100[100] == false);
     }
 }
