@@ -31,15 +31,16 @@ bool palgox::palgox_vecx::isSameSize(const palgox_vecx* other_vecx) const {
 bool palgox::palgox_vecx::isEqual(const palgox_vecx* other_vecx) const {
     if (!this->isSameSize(other_vecx)) return false;
     bool result = true;
-#pragma omp parallel for shared(result)
-    for (int idx = 0; idx < this->m_numElems; idx++) {
-        if (this->m_data[idx] != other_vecx->getValue(idx)) {
+#pragma omp parallel for
+    for (int i = 0; i < this->m_data.size(); ++i) {
+        if (!result) continue;  // check shared result
+        if (this->m_data[i] != other_vecx->m_data[i]) {
 #pragma omp critical
-            result = false;
-#pragma omp cancel for
+            {
+                result = false;  // update result safely
+            }
         }
     }
-#pragma omp cancellation point for
     return result;
 }
 
@@ -85,13 +86,14 @@ int palgox::palgox_vecx::search(const int value) const {
     int idx = -1;
 #pragma omp parallel for
     for (int i = 0; i < this->m_numElems; i++) {
+        if (idx != -1) continue;
         if (this->m_data[i] == value) {
-#pragma omp atomic write
-            idx = i;
-#pragma omp cancel for
+#pragma omp critical
+            {
+                idx = i;
+            }
         }
     }
-#pragma omp cancellation point for
     return idx;
 }
 
@@ -216,27 +218,31 @@ palgox::palgox_vecx* palgox::palgox_vecx::filter(bool (*operation)(int)) const {
 
 bool palgox::palgox_vecx::andMap(bool (*operation)(int)) const {
     bool result = true;
+#pragma omp parallel for
     for (int i = 0; i < this->m_numElems; i++) {
+        if (!result) continue;
         if (!operation(this->m_data[i])) {
-#pragma omp atomic write
-            result = false;
-#pragma omp cancel for
+#pragma omp critical
+            {
+                result = false;
+            }
         }
     }
-#pragma omp cancellation point for
     return result;
 }
 
 bool palgox::palgox_vecx::orMap(bool (*operation)(int)) const {
     bool result = false;
+#pragma omp parallel for
     for (int i = 0; i < this->m_numElems; i++) {
+        if (result) continue;
         if (operation(this->m_data[i])) {
-#pragma omp atomic write
-            result = true;
-#pragma omp cancel for
+#pragma omp critical
+            {
+                result = true;
+            }
         }
     }
-#pragma omp cancellation point for
     return result;
 }
 
@@ -375,14 +381,15 @@ bool palgox::palgox_matx::isEqual(const palgox_matx* other_matx) const {
 #pragma omp parallel for collapse(2) shared(result)
     for (int i = 0; i < this->m_numRow; ++i) {
         for (int j = 0; j < this->m_numCol; ++j) {
+            if (!result) continue;
             if (this->m_data[i][j] != other_matx->getValue(i, j)) {
-#pragma omp atomic write
-                result = false;
-#pragma omp cancel for
+#pragma omp critical
+                {
+                    result = false;
+                }
             }
         }
     }
-#pragma omp cancellation point for
     return result;
 }
 
@@ -446,14 +453,15 @@ bool palgox::palgox_matx::andMap(bool (*operation)(int)) const {
 #pragma omp parallel for collapse(2) reduction(&&:result)
     for (int i = 0; i < this->m_numRow; i++) {
         for (int j = 0; j < this->m_numCol; j++) {
+            if (!result) continue;
             if (!operation(this->m_data[i][j])) {
-#pragma omp atomic write
-                result = false;
-#pragma omp cancel for
+#pragma omp critical
+                {
+                    result = false;
+                }
             }
         }
     }
-#pragma omp cancellation point for
     return result;
 }
 
@@ -462,14 +470,15 @@ bool palgox::palgox_matx::orMap(bool (*operation)(int)) const {
 #pragma omp parallel for collapse(2) reduction(||:result)
     for (int i = 0; i < this->m_numRow; i++) {
         for (int j = 0; j < this->m_numCol; j++) {
+            if (result) continue;
             if (operation(this->m_data[i][j])) {
-#pragma omp atomic write
-                result = true;
-#pragma omp cancel for
+#pragma omp critical
+                {
+                    result = true;
+                }
             }
         }
     }
-#pragma omp cancellation point for
     return result;
 }
 
