@@ -198,7 +198,7 @@ TEST_CASE("PAlgoX_VecX reduceLeft/ reduceRight/ findMin/ findMax Tests", "[singl
     SECTION("Valid PAlgoX_VecX reduceRight Test") {
         const auto* test_vecx = new palgox::palgox_vecx(test_input_data);
         int result;
-        CHECK_NOTHROW(result = test_vecx->reduceLeft(400, [](const int a, const int b){return a / b;}));
+        CHECK_NOTHROW(result = test_vecx->reduceRight(400, [](const int a, const int b){return a / b;}));
         REQUIRE(result == 3);
         delete test_vecx;
     }

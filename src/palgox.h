@@ -41,9 +41,6 @@ namespace palgox {
 
         static void merge(std::vector<int>& arr, int left, int mid, int right);
 
-        static void findMinHelper(const std::vector<int>& data, int start, int end, int& min_elem);
-
-        static void findMaxHelper(const std::vector<int>& data, int start, int end, int& max_elem);
     public:
         explicit palgox_vecx(const std::vector<int>& input_data);
 

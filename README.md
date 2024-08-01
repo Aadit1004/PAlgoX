@@ -4,11 +4,50 @@ C++ Parallel Algorithms Static Library
 
 ## About the Project
 
-Developed a C++ static library focusing on multithreaded algorithms using the SIMD parallel paradigm in topics such as searching, sorting, graphs, vectors, matrices, and mathematics. I used OpenMP, C++, Catch2, and CLion,
+Developed a C++ static library focusing on multithreaded algorithms using the SIMD parallel paradigm in topics such as searching, sorting, graphs, vectors, matrices, and mathematics. I used C++, OpenMP, Catch2, and CLion,
 with a big focus on runtime optimization and robust unit testing. 
 
-<!-- 
+### Speed Up Tests
 
+Tests done to observe speed up rates on the ***PalgoX VecX*** class was done on 5 various methods and done
+on a randomized integer values with a vector size _n_ of 10,000,000. Each method was run 10 times and each time with new randomized data.
+
+<ul>
+  <li> <strong>Search</strong>
+    <ul>
+      <li>Average Speed Up Rate: 5.89x</li>
+    </ul>
+  </li>
+<li> <strong>Find Max</strong>
+    <ul>
+      <li>Average Speed Up Rate: 6.04x</li>
+    </ul>
+  </li>
+<li><strong>Reduce Left</strong>
+    <ul>
+      <li>Average Speed Up Rate: 2.98x</li>
+    </ul>
+  </li>
+<li><strong>Apply Operation</strong>
+    <ul>
+      <li>Average Speed Up Rate: 3.69x</li>
+    </ul>
+  </li>
+<li> <strong>OrMap</strong>
+    <ul>
+      <li>Average Speed Up Rate: 15.71x</li>
+    </ul>
+  </li>
+</ul>
+
+Which gives an estimated average of 6.862x speed up for VecX operations based on these various and randomly chosen methods.
+
+
+
+
+
+
+<!--
 ## **PAlgoX_MatX Documentation**
 Documentation for the PAlgoX MatX class methods. Currently supporting Integer data type.
 

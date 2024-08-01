@@ -246,62 +246,28 @@ bool palgox::palgox_vecx::orMap(bool (*operation)(int)) const {
     return result;
 }
 
-void palgox::palgox_vecx::findMinHelper(const std::vector<int>& data, const int start, const int end, int& min_elem) {
-    min_elem = INT32_MAX;
-    for (int i = start; i < end; i++) {
-        min_elem = std::min(min_elem, data[i]);
-    }
-}
-
 int palgox::palgox_vecx::findMin() const {
-    const int numThreads = static_cast<int>(std::thread::hardware_concurrency());
-    const int chunkSize = (m_numElems + numThreads - 1) / numThreads;
-    std::vector<std::thread> threads(numThreads);
-    std::vector results(numThreads, INT32_MAX);
-
-    for (int t = 0; t < numThreads; t++) {
-        int start = t * chunkSize;
-        int end = std::min(start + chunkSize, m_numElems);
-        threads[t] = std::thread(&palgox_vecx::findMinHelper, this->m_data, start, end, std::ref(results[t]));
+    int min_elem = INT32_MAX;
+#pragma omp parallel for reduction(min:min_elem)
+    for (int i = 0; i < m_numElems; i++) {
+        min_elem = std::min(min_elem, m_data[i]);
     }
-
-    for (auto& thread : threads) {
-        thread.join();
-    }
-
-    return *std::min_element(results.begin(), results.end());
-}
-
-void palgox::palgox_vecx::findMaxHelper(const std::vector<int>& data, const int start, const int end, int& max_elem) {
-    max_elem = INT32_MIN;
-    for (int i = start; i < end; i++) {
-        max_elem = std::max(max_elem, data[i]);
-    }
+    return min_elem;
 }
 
 int palgox::palgox_vecx::findMax() const {
-    const int numThreads = static_cast<int>(std::thread::hardware_concurrency());
-    const int chunkSize = (m_numElems + numThreads - 1) / numThreads;
-    std::vector<std::thread> threads(numThreads);
-    std::vector results(numThreads, INT32_MIN);
-
-    for (int t = 0; t < numThreads; t++) {
-        int start = t * chunkSize;
-        int end = std::min(start + chunkSize, m_numElems);
-        threads[t] = std::thread(&palgox_vecx::findMaxHelper, this->m_data, start, end, std::ref(results[t]));
+    int max_elem = INT32_MIN;
+#pragma omp parallel for reduction(max:max_elem)
+    for (int i = 0; i < m_numElems; i++) {
+        max_elem = std::max(max_elem, m_data[i]);
     }
-
-    for (auto& thread : threads) {
-        thread.join();
-    }
-
-    return *std::max_element(results.begin(), results.end());
+    return max_elem;
 }
 
 int palgox::palgox_vecx::reduceLeft(const int init, int (*operation)(int, int)) const {
-    // TODO: SEQUENTIAL VERSION, make multithreaded ?
     int result = init;
-    for (int i = 0; i < this->m_numElems; i++) {
+#pragma omp parallel for reduction(+:result)
+    for (int i = 0; i < this->m_numElems; ++i) {
         result = operation(result, m_data[i]);
     }
     return result;
