@@ -7,7 +7,7 @@ C++ Parallel Algorithms Static Library
 Developed a C++ static library focusing on multithreaded algorithms using the SIMD parallel paradigm in topics such as searching, sorting, graphs, vectors, matrices, and mathematics. I used C++, OpenMP, Catch2, and CLion,
 with a big focus on runtime optimization and robust unit testing. 
 
-### Speed Up Tests
+### Vector Speed Up Tests
 
 Tests done to observe speed up rates on the ***PalgoX VecX*** class was done on 5 various methods and done
 on a randomized integer values with a vector size _n_ of 10,000,000. Each method was run 10 times and each time with new randomized data.
@@ -42,9 +42,55 @@ on a randomized integer values with a vector size _n_ of 10,000,000. Each method
 
 Which gives an estimated average of 6.862x speed up for VecX operations based on these various and randomly chosen methods.
 
+### Matrix Speed Up Tests
 
+Tests done to observe speed up rates on the ***PalgoX MatX*** class was done on 3 various methods and done
+on a randomized integer values with a matrix size _n x n_ where _n_ is 5,000. Each method was run 10 times and each time with new randomized data.
 
+<ul>
+  <li> <strong>Add Matrix</strong>
+    <ul>
+      <li>Average Speed Up Rate: 2.53x</li>
+    </ul>
+  </li>
+<li> <strong>Get Transpose</strong>
+    <ul>
+      <li>Average Speed Up Rate: 2.66x</li>
+    </ul>
+  </li>
+<li><strong>Multiply Matrices</strong> (Completed with n=500)
+    <ul>
+      <li>Average Speed Up Rate: 2.44x</li>
+    </ul>
+  </li>
+</ul>
 
+Which gives an estimated average of 2.54x speed up for MatX operations based on these various and randomly chosen methods.
+
+### Math Utilities Speed Up Tests
+
+Tests done to observe speed up rates on the ***PalgoX MathX*** class was done on 3 various methods and done
+on a randomized integer values. Each method was run 10 times and each time with new randomized data.
+
+<ul>
+  <li> <strong>Compute Factorial</strong>
+    <ul>
+      <li>Average Speed Up Rate: #.##x</li>
+    </ul>
+  </li>
+<li> <strong>Compute Powers</strong>
+    <ul>
+      <li>Average Speed Up Rate: #.##x</li>
+    </ul>
+  </li>
+<li><strong>Generate Primes</strong>
+    <ul>
+      <li>Average Speed Up Rate: #.##x</li>
+    </ul>
+  </li>
+</ul>
+
+Which gives an estimated average of #.##x speed up for MathX operations based on these chosen methods.
 
 
 <!--

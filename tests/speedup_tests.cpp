@@ -6,27 +6,10 @@
 #include "../src/palgox.h"
 
 /*
-
-// TESTING FUNCTIONS:
-
-vec:
-- search (DONE)
-- find max (DONE)
-- reduce left (add) (DONE)
-- apply operation (*2) (DONE)
-- orMap (DONE)
-
-mat:
-- add matrix
-- get transpose
-- multiply matrix
-
-graph:
-- has Cycle
-
 math:
 - factorial
 - compute powers
+- generate primes
 */
 
 std::vector<int> generateRandomVec(const unsigned int n) {
@@ -37,6 +20,21 @@ std::vector<int> generateRandomVec(const unsigned int n) {
     }
     return vec;
 }
+
+std::vector<std::vector<int>> generateRandomMat(const unsigned int rows, const unsigned int cols) {
+    std::vector<std::vector<int>> mat;
+    mat.reserve(rows);
+    for (unsigned int i = 0; i < rows; ++i) {
+        std::vector<int> row;
+        row.reserve(cols);
+        for (unsigned int j = 0; j < cols; ++j) {
+            row.push_back((rand() % std::numeric_limits<int16_t>::max()) - 5000);
+        }
+        mat.push_back(std::move(row));
+    }
+    return mat;
+}
+
 
 void testSearchVecx(const unsigned int n, std::vector<double>& speedUpList) {
     std::vector<int> input_data_one = generateRandomVec(n);
@@ -176,18 +174,133 @@ void testOrMapVecx(const unsigned int n, std::vector<double>& speedUpList) {
     speedUpList.push_back(speedup);
 }
 
+void testAddMatx(const unsigned int rows, const unsigned int cols, std::vector<double>& speedUpList) {
+    std::vector<std::vector<int>> input_data_one = generateRandomMat(rows, cols);
+    std::vector<std::vector<int>> input_data_two = generateRandomMat(rows, cols);
+
+    // sequential version
+    const auto start_seq = std::chrono::high_resolution_clock::now();
+    bool ret = false;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            input_data_two[i][j] += input_data_two[i][j];
+        }
+    }
+    const auto end_seq = std::chrono::high_resolution_clock::now();
+    const std::chrono::duration<double> duration_seq = end_seq - start_seq;
+
+    // parallel version
+    auto* matx_one = new palgox::palgox_matx(input_data_one);
+    const auto matx_two = palgox::palgox_matx(input_data_two);
+    const auto start_par = std::chrono::high_resolution_clock::now();
+    matx_one->addMatx(&matx_two);
+    const auto end_par = std::chrono::high_resolution_clock::now();
+    const std::chrono::duration<double> duration_par = end_par - start_par;
+
+    // Calculate speedup
+    const double speedup = duration_seq.count() / duration_par.count();
+    std::cout << "MatX addMatx Speedup: " << speedup << "x" << std::endl;
+
+    speedUpList.push_back(speedup);
+}
+
+void testGetTransposeMatx(const unsigned int rows, const unsigned int cols, std::vector<double>& speedUpList) {
+    std::vector<std::vector<int>> input_data_one = generateRandomMat(rows, cols);
+
+    // sequential version
+    const auto start_seq = std::chrono::high_resolution_clock::now();
+    std::vector<std::vector<int>> ret_mat(cols, std::vector<int>(rows));
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            ret_mat[j][i] = input_data_one[i][j];
+        }
+    }
+    const auto end_seq = std::chrono::high_resolution_clock::now();
+    const std::chrono::duration<double> duration_seq = end_seq - start_seq;
+
+    // parallel version
+    auto* matx_one = new palgox::palgox_matx(input_data_one);
+    const auto start_par = std::chrono::high_resolution_clock::now();
+    const std::unique_ptr<palgox::palgox_matx> retMat(matx_one->getTranspose());
+    const auto end_par = std::chrono::high_resolution_clock::now();
+    const std::chrono::duration<double> duration_par = end_par - start_par;
+
+    // Calculate speedup
+    const double speedup = duration_seq.count() / duration_par.count();
+    std::cout << "MatX getTranspose Speedup: " << speedup << "x" << std::endl;
+
+    speedUpList.push_back(speedup);
+}
+
+void testMulMatx(const unsigned int rows, const unsigned int cols, std::vector<double>& speedUpList) {
+    std::vector<std::vector<int>> input_data_one = generateRandomMat(rows, cols);
+    std::vector<std::vector<int>> input_data_two = generateRandomMat(rows, cols);
+
+    // sequential version
+    const auto start_seq = std::chrono::high_resolution_clock::now();
+    std::vector<std::vector<int>> retval_data(rows, std::vector<int>(cols));
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            int sum = 0;
+            for (int k = 0; k < cols; k++) {
+                sum += (input_data_one[i][k] * input_data_two[k][j]);
+            }
+            retval_data[i][j] = sum;
+        }
+    }
+    const auto end_seq = std::chrono::high_resolution_clock::now();
+    const std::chrono::duration<double> duration_seq = end_seq - start_seq;
+
+    // parallel version
+    auto* matx_one = new palgox::palgox_matx(input_data_one);
+    const auto matx_two = palgox::palgox_matx(input_data_two);
+    const auto start_par = std::chrono::high_resolution_clock::now();
+    const std::unique_ptr<palgox::palgox_matx> retMat(matx_one->mulMatx(&matx_two));
+    const auto end_par = std::chrono::high_resolution_clock::now();
+    const std::chrono::duration<double> duration_par = end_par - start_par;
+
+    // Calculate speedup
+    const double speedup = duration_seq.count() / duration_par.count();
+    std::cout << "MatX mulMatx Speedup: " << speedup << "x" << std::endl;
+
+    speedUpList.push_back(speedup);
+}
+
+void testFactorial(std::vector<double>& speedUpList) {
+    int value = 12; // computing 12 factorial
+}
+
+void testComputePowers(std::vector<double>& speedUpList) {
+    
+}
+
+void testGeneratePrimes(std::vector<double>& speedUpList) {
+
+}
+
 int main() {
     constexpr unsigned int n = 10000000; // large input where n = 10 mil
+    constexpr unsigned int rows = 500, cols = 500;
     std::vector<double> speedUpVecxList;
     for (int i = 0; i < 10; i++) {
         // put testing method here
-        testOrMapVecx(n, speedUpVecxList);
+        // testOrMapVecx(n, speedUpVecxList); // vecx one
+        // testMulMatx(rows, cols, speedUpVecxList);
     }
+
     // testSearchVecx(n, speedUpVecxList);
     // testFindMaxVecx(n, speedUpVecxList);
     // testReduceLeftVecx(n, speedUpVecxList);
     // testApplyOperationVecx(n, speedUpVecxList);
     // testOrMapVecx(n, speedUpVecxList);
+
+    // testAddMatx(rows, cols, speedUpVecxList);
+    // testGetTranspose(rows, cols, speedUpVecxList);
+    // testMulMatx(rows, cols, speedUpVecxList);
+
+    //
+    //
+    //
 
     // compute average speed up
     double average = 0;
