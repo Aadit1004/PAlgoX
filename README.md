@@ -69,28 +69,18 @@ Which gives an estimated average of 2.54x speed up for MatX operations based on 
 
 ### Math Utilities Speed Up Tests
 
-Tests done to observe speed up rates on the ***PalgoX MathX*** class was done on 3 various methods and done
-on a randomized integer values. Each method was run 10 times and each time with new randomized data.
+Tests done to observe speed up rates on the ***PalgoX MathX*** class was done on 1 random method and done
+on a randomized integer values with an vector size _n_ of 10,000,000. Each method was run 10 times and each time with new randomized data.
 
 <ul>
-  <li> <strong>Compute Factorial</strong>
-    <ul>
-      <li>Average Speed Up Rate: #.##x</li>
-    </ul>
-  </li>
-<li> <strong>Compute Powers</strong>
-    <ul>
-      <li>Average Speed Up Rate: #.##x</li>
-    </ul>
-  </li>
-<li><strong>Generate Primes</strong>
-    <ul>
-      <li>Average Speed Up Rate: #.##x</li>
+    <li> <strong>Compute Powers</strong>
+        <ul>
+            <li>Average Speed Up Rate: 7.77x</li>
     </ul>
   </li>
 </ul>
 
-Which gives an estimated average of #.##x speed up for MathX operations based on these chosen methods.
+<!-- Which gives an estimated average of 7.77x speed up for MathX operations based on this randomly chosen method. -->
 
 
 <!--

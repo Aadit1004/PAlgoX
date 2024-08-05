@@ -266,16 +266,38 @@ void testMulMatx(const unsigned int rows, const unsigned int cols, std::vector<d
     speedUpList.push_back(speedup);
 }
 
-void testFactorial(std::vector<double>& speedUpList) {
-    int value = 12; // computing 12 factorial
-}
+void testComputePowers(const int n, std::vector<double>& speedUpList) {
+    std::vector<int> vec_one;
+    vec_one.reserve(n);
+    for (unsigned int i = 0; i < n; ++i) {
+        vec_one.push_back((rand() % (std::numeric_limits<int16_t>::max() / 10)));
+    }
+    std::vector<int> vec_two;
+    vec_two.reserve(n); // this reserves space to improve performance
+    for (unsigned int i = 0; i < n; ++i) {
+        vec_two.push_back(rand() % 4);
+    }
 
-void testComputePowers(std::vector<double>& speedUpList) {
-    
-}
+    // sequential version
+    const auto start_seq = std::chrono::high_resolution_clock::now();
+    std::vector<int> seq_ret_vec(n);
+    for (int i = 0; i < n; i++) {
+        seq_ret_vec.push_back(static_cast<int>(std::pow(vec_one[i], vec_two[i])));
+    }
+    const auto end_seq = std::chrono::high_resolution_clock::now();
+    const std::chrono::duration<double> duration_seq = end_seq - start_seq;
 
-void testGeneratePrimes(std::vector<double>& speedUpList) {
+    // parallel version
+    const auto start_par = std::chrono::high_resolution_clock::now();
+    std::vector<int> ret_vec = palgox::palgox_mathx::computePowers(vec_one, vec_two);
+    const auto end_par = std::chrono::high_resolution_clock::now();
+    const std::chrono::duration<double> duration_par = end_par - start_par;
 
+    // Calculate speedup
+    const double speedup = duration_seq.count() / duration_par.count();
+    std::cout << "Math Compute Powers Speedup: " << speedup << "x" << std::endl;
+
+    speedUpList.push_back(speedup);
 }
 
 int main() {
@@ -284,8 +306,7 @@ int main() {
     std::vector<double> speedUpVecxList;
     for (int i = 0; i < 10; i++) {
         // put testing method here
-        // testOrMapVecx(n, speedUpVecxList); // vecx one
-        // testMulMatx(rows, cols, speedUpVecxList);
+        testComputePowers(n, speedUpVecxList);
     }
 
     // testSearchVecx(n, speedUpVecxList);
@@ -298,8 +319,6 @@ int main() {
     // testGetTranspose(rows, cols, speedUpVecxList);
     // testMulMatx(rows, cols, speedUpVecxList);
 
-    //
-    //
     //
 
     // compute average speed up
